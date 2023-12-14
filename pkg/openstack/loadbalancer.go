@@ -480,6 +480,7 @@ func (lbaas *LbaasV2) createOctaviaLoadBalancer(name, clusterName string, servic
 	}
 
 	vipPort := getStringFromServiceAnnotation(service, ServiceAnnotationLoadBalancerPortID, "")
+	// TODO 涉及到从文件中获取的，改为cmp传递，也就是从service的注解中获取
 	lbClass := lbaas.opts.LBClasses[svcConf.configClassName]
 
 	if vipPort != "" {
@@ -1182,11 +1183,13 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	// By default, use the protocol of the listener
 	poolProto := v2pools.Protocol(listener.Protocol)
 	if svcConf.enableProxyProtocol {
+        // 默认false
 		poolProto = v2pools.ProtocolPROXY
 	} else if (svcConf.keepClientIP || svcConf.tlsContainerRef != "") && poolProto != v2pools.ProtocolHTTP {
 		poolProto = v2pools.ProtocolHTTP
 	}
 
+	// 默认情况pool Protocol为listener的Protocol
 	// Delete the pool and its members if it already exists and has the wrong protocol
 	if pool != nil && v2pools.Protocol(pool.Protocol) != poolProto {
 		klog.InfoS("Deleting unused pool", "poolID", pool.ID, "listenerID", listener.ID, "lbID", lbID)
@@ -1199,6 +1202,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	}
 
 	if pool == nil {
+		// creat情况
 		createOpt := lbaas.buildPoolCreateOpt(listener.Protocol, service, svcConf, name)
 		createOpt.ListenerID = listener.ID
 
@@ -1220,6 +1224,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 		return pool, nil
 	}
 
+	// TODO 将member从pool中拿出来
 	curMembers := sets.New[string]()
 	poolMembers, err := openstackutil.GetMembersbyPool(lbaas.lb, pool.ID)
 	if err != nil {
@@ -1279,13 +1284,14 @@ func (lbaas *LbaasV2) buildPoolCreateOpt(listenerProtocol string, service *corev
 	}
 }
 
+// TODO address改为endpoint获取
 // buildBatchUpdateMemberOpts returns v2pools.BatchUpdateMemberOpts array for Services and Nodes alongside a list of member names
 func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(port corev1.ServicePort, nodes []*corev1.Node, svcConf *serviceConfig) ([]v2pools.BatchUpdateMemberOpts, sets.Set[string], error) {
 	var members []v2pools.BatchUpdateMemberOpts
 	newMembers := sets.New[string]()
 
 	for _, node := range nodes {
-		addr, err := nodeAddressForLB(node, svcConf.preferredIPFamily)
+		addr, err := nodeAddressForLB(+, svcConf.preferredIPFamily)
 		if err != nil {
 			if err == cpoerrors.ErrNoAddressFound {
 				// Node failure, do not create member
@@ -1320,11 +1326,14 @@ func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(port corev1.ServicePort, nodes 
 
 // Make sure the listener is created for Service
 func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListenerMapping map[listenerKey]*listeners.Listener, port corev1.ServicePort, svcConf *serviceConfig, _ *corev1.Service) (*listeners.Listener, error) {
+	// name: listener_【portIndex】_【LBName】例如： listener_【portIndex】_kube_service_[clusterName]_[Namespace]_[serviceName]
+	// TODO 已存在的listener会抛错,此处默认都不存在
 	listener, isPresent := curListenerMapping[listenerKey{
 		Protocol: getListenerProtocol(port.Protocol, svcConf),
 		Port:     int(port.Port),
 	}]
 	if !isPresent {
+		// 前边已经校验过，listener默认不存在,但是更新时时有listener
 		listenerCreateOpt := lbaas.buildListenerCreateOpt(port, svcConf, name)
 		listenerCreateOpt.LoadbalancerID = lbID
 
@@ -1338,6 +1347,7 @@ func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListene
 
 		klog.V(2).Infof("Listener %s created for loadbalancer %s", listener.ID, lbID)
 	} else {
+		// 同一个service更新时，listener内容更新为service最新
 		listenerChanged := false
 		updateOpts := listeners.UpdateOpts{}
 
@@ -1418,7 +1428,11 @@ func (lbaas *LbaasV2) buildListenerCreateOpt(port corev1.ServicePort, svcConf *s
 		ProtocolPort: int(port.Port),
 		ConnLimit:    &svcConf.connLimit,
 	}
-
+    // TODO 此处改为自定义的tag,将openstack与容器区分开,暂时定义改为name,其中name为listener_portIndex_lbname
+    // cpoutil.Sprintf255(lbFormat, servicePrefix, clusterName, service.Namespace, service.Name)
+    // servicePrefix                       = "kube_service_"
+    // // Octavia listener name formats
+	//	name为listener_portIndex_lbname
 	if svcConf.supportLBTags {
 		listenerCreateOpt.Tags = []string{svcConf.lbName}
 	}
@@ -1630,6 +1644,7 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 		return fmt.Errorf("no service ports provided")
 	}
 
+	// 不支持双栈
 	if len(service.Spec.IPFamilies) > 0 {
 		// Since OCCM does not support multiple load-balancers per service yet,
 		// the first IP family will determine the IP family of the load-balancer
@@ -1641,12 +1656,13 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 
 	// If in the config file internal-lb=true, user is not allowed to create external service.
 	if lbaas.opts.InternalLB {
+		// 默认不走
 		if !getBoolFromServiceAnnotation(service, ServiceAnnotationLoadBalancerInternal, false) {
 			klog.V(3).InfoS("Enforcing internal LB", "annotation", true, "config", false)
 		}
 		svcConf.internal = true
 	} else if svcConf.preferredIPFamily == corev1.IPv6Protocol {
-		// floating IPs are not supported in IPv6 networks
+		//  	 IPs are not supported in IPv6 networks
 		svcConf.internal = true
 	} else {
 		svcConf.internal = getBoolFromServiceAnnotation(service, ServiceAnnotationLoadBalancerInternal, lbaas.opts.InternalLB)
@@ -1705,6 +1721,7 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 	} else {
 		svcConf.lbMemberSubnetID = svcConf.lbSubnetID
 	}
+
 	if len(svcConf.lbNetworkID) == 0 && len(svcConf.lbSubnetID) == 0 {
 		subnetID, err := getSubnetIDForLB(lbaas.network, *nodes[0], svcConf.preferredIPFamily)
 		if err != nil {
@@ -1724,13 +1741,16 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 		svcConf.lbMemberSubnetID = memberSubnetID
 	}
 
+	// TODO 此处应该改为从service注解获取float ip等信息
 	if !svcConf.internal {
+		// fload ip
 		var lbClass *LBClass
 		var floatingNetworkID string
 		var floatingSubnet floatingSubnetSpec
 
 		klog.V(4).Infof("Ensure an external loadbalancer service")
 
+		// TODO 屏蔽掉
 		svcConf.configClassName = getStringFromServiceAnnotation(service, ServiceAnnotationLoadBalancerClass, "")
 		if svcConf.configClassName != "" {
 			lbClass = lbaas.opts.LBClasses[svcConf.configClassName]
@@ -1749,11 +1769,13 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 			}
 		}
 
+		// TODO 默认从CMP获取
 		// If LB class doesn't define FIP network or subnet, get it from svc annotation or fall back to configuration
 		if floatingNetworkID == "" {
 			floatingNetworkID = getStringFromServiceAnnotation(service, ServiceAnnotationLoadBalancerFloatingNetworkID, lbaas.opts.FloatingNetworkID)
 		}
 
+		// TODO 屏蔽掉
 		// If there's no annotation and configuration, try to autodetect the FIP network by looking up external nets
 		if floatingNetworkID == "" {
 			floatingNetworkID, err = openstackutil.GetFloatingNetworkID(lbaas.network)
@@ -1762,6 +1784,7 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 			}
 		}
 
+		// TODO 去掉判断逻辑，直接从注解获取所需信息
 		// try to get FIP subnet from configuration
 		if !floatingSubnet.Configured() {
 			annos := floatingSubnetSpec{}
@@ -1781,6 +1804,8 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 			}
 		}
 
+
+		// 验证 subnet是否属于network
 		// check configured subnet belongs to network
 		if floatingNetworkID != "" && floatingSubnet.subnetID != "" {
 			mc := metrics.NewMetricContext("subnet", "get")
@@ -1793,6 +1818,7 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 				return fmt.Errorf("floating IP subnet %q doesn't belong to the network %q", floatingSubnet.subnetID, subnet.NetworkID)
 			}
 		}
+
 
 		svcConf.lbPublicNetworkID = floatingNetworkID
 		if floatingSubnet.Configured() {
@@ -1864,6 +1890,7 @@ func (lbaas *LbaasV2) checkListenerPorts(service *corev1.Service, curListenerMap
 		if listener, isPresent := curListenerMapping[key]; isPresent {
 			// The listener is used by this Service if LB name is in the tags, or
 			// the listener was created by this Service.
+			// TODO 存在且tag不属于当前service时，则认为已经存在非当前service的listener（openstack||其他service）,且只要有一个存在，则整体抛错，不再继续进行
 			if cpoutil.Contains(listener.Tags, lbName) || (len(listener.Tags) == 0 && isLBOwner) {
 				continue
 			} else {
@@ -1946,6 +1973,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 	createNewLB := false
 
 	// Check the load balancer in the Service annotation.
+	// loadbalancer存在的情况
 	if svcConf.lbID != "" {
 		loadbalancer, err = openstackutil.GetLoadbalancerByID(lbaas.lb, svcConf.lbID)
 		if err != nil {
@@ -1955,11 +1983,13 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		// If this LB name matches the default generated name, the Service 'owns' the LB, but it's also possible for this
 		// LB to be shared by other Services.
 		// If the names don't match, this is a LB this Service wants to attach.
+		// TODO 暂定loadbalancer由CMP创建，那么isLBOwner字段默认都是false,此代码去掉
 		if loadbalancer.Name == lbName {
 			isLBOwner = true
 		}
 
 		// Shared LB can only be supported when the Tag feature is available in Octavia.
+		// TODO 判断ocativa是否支持tag
 		if !svcConf.supportLBTags && !isLBOwner {
 			return nil, fmt.Errorf("shared load balancer is only supported with the tag feature in the cloud load balancer service")
 		}
@@ -1983,6 +2013,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 			}
 		}
 	} else {
+		// TODO v8版本不支持新增lb，所以需要删掉
 		legacyName := lbaas.getLoadBalancerLegacyName(ctx, clusterName, service)
 		loadbalancer, err = getLoadbalancerByName(lbaas.lb, lbName, legacyName)
 		if err != nil {
@@ -2013,9 +2044,11 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 
 	// This is an existing load balancer, either created by occm for other Services or by the user outside of cluster, or
 	// a newly created, unpopulated loadbalancer that needs populating.
+	// TODO 默认存在
 	if !createNewLB || (lbaas.opts.ProviderRequiresSerialAPICalls && createNewLB) {
 		curListeners := loadbalancer.Listeners
 		curListenerMapping := make(map[listenerKey]*listeners.Listener)
+		// 查询已经listner
 		for i, l := range curListeners {
 			key := listenerKey{Protocol: listeners.Protocol(l.Protocol), Port: l.ProtocolPort}
 			curListenerMapping[key] = &curListeners[i]
@@ -2023,16 +2056,19 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		klog.V(4).InfoS("Existing listeners", "portProtocolMapping", curListenerMapping)
 
 		// Check port conflicts
+		// 校验listener是否已经存在
 		if err := lbaas.checkListenerPorts(service, curListenerMapping, isLBOwner, lbName); err != nil {
 			return nil, err
 		}
 
+        // 生成listener+pool+memeber
 		for portIndex, port := range service.Spec.Ports {
 			listener, err := lbaas.ensureOctaviaListener(loadbalancer.ID, cpoutil.Sprintf255(listenerFormat, portIndex, lbName), curListenerMapping, port, svcConf, service)
 			if err != nil {
 				return nil, err
 			}
 
+			// 包含pool和memeber
 			pool, err := lbaas.ensureOctaviaPool(loadbalancer.ID, cpoutil.Sprintf255(poolFormat, portIndex, lbName), listener, service, port, nodes, svcConf)
 			if err != nil {
 				return nil, err
@@ -2048,12 +2084,14 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 			curListeners = popListener(curListeners, listener.ID)
 		}
 
+		// TODO 此代码删除，lb由CMP创建，一个lb可对应多个service
 		// Deal with the remaining listeners, delete the listener if it was created by this Service previously.
 		if err := lbaas.deleteOctaviaListeners(loadbalancer.ID, curListeners, isLBOwner, lbName); err != nil {
 			return nil, err
 		}
 	}
 
+	// TODO floating IP 由CMP页面添加，此代码屏蔽掉
 	addr, err := lbaas.ensureFloatingIP(clusterName, service, loadbalancer, svcConf, isLBOwner)
 	if err != nil {
 		return nil, err
@@ -2433,6 +2471,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 	legacyName := lbaas.getLoadBalancerLegacyName(ctx, clusterName, service)
 	var err error
 	var loadbalancer *loadbalancers.LoadBalancer
+	// TODO LB默认为share,且provider-openstack不处理LB
 	isSharedLB := false
 	updateLBTag := false
 	isCreatedByOCCM := false
@@ -2459,10 +2498,12 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		return fmt.Errorf("load balancer %s is in immutable status, current provisioning status: %s", loadbalancer.ID, loadbalancer.ProvisioningStatus)
 	}
 
+	// TODO 删掉
 	if strings.HasPrefix(loadbalancer.Name, servicePrefix) {
 		isCreatedByOCCM = true
 	}
 
+	// TODO 删掉
 	if svcConf.supportLBTags {
 		for _, tag := range loadbalancer.Tags {
 			if tag == lbName {
@@ -2473,6 +2514,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		}
 	}
 
+	// TODO 删掉
 	// If the LB is shared by other Service or the LB was not created by occm, the LB should not be deleted.
 	needDeleteLB := true
 	if isSharedLB || !isCreatedByOCCM {
@@ -2481,6 +2523,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 
 	klog.V(4).InfoS("Deleting service", "service", klog.KObj(service), "needDeleteLB", needDeleteLB, "isSharedLB", isSharedLB, "updateLBTag", updateLBTag, "isCreatedByOCCM", isCreatedByOCCM)
 
+	// TODO 删掉，不处理floating ip
 	keepFloatingAnnotation := getBoolFromServiceAnnotation(service, ServiceAnnotationLoadBalancerKeepFloatingIP, false)
 	if needDeleteLB && !keepFloatingAnnotation {
 		if loadbalancer.VipPortID != "" {
@@ -2501,6 +2544,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 	}
 
 	if needDeleteLB && lbaas.opts.CascadeDelete {
+		// TODO 删掉此代码，不处理lb
 		klog.InfoS("Deleting load balancer", "lbID", loadbalancer.ID, "service", klog.KObj(service))
 		if err := openstackutil.DeleteLoadbalancer(lbaas.lb, loadbalancer.ID, true); err != nil {
 			return err
@@ -2514,6 +2558,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		}
 
 		if !needDeleteLB {
+			// TODO 默认不删除LB
 			var listenersToDelete []listeners.Listener
 			curListenerMapping := make(map[listenerKey]*listeners.Listener)
 			for i, l := range listenerList {
@@ -2527,6 +2572,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 					Protocol: proto,
 					Port:     int(port.Port),
 				}]
+				// 这一部分不需要改，通过listener的tags以及key确认listener的归属
 				if isPresent && cpoutil.Contains(listener.Tags, lbName) {
 					listenersToDelete = append(listenersToDelete, *listener)
 				}
@@ -2572,6 +2618,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		}
 	}
 
+	// TODO 删掉此代码，不处理LB
 	// Remove the Service's tag from the load balancer.
 	if !needDeleteLB && updateLBTag {
 		var newTags []string
@@ -2591,6 +2638,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		klog.InfoS("Updated load balancer tags", "lbID", loadbalancer.ID)
 	}
 
+	// 暂不需要处理
 	// Delete the Security Group. We're doing that even if `manage-security-groups` is disabled to make sure we don't
 	// orphan created SGs even if CPO got reconfigured.
 	if err := lbaas.EnsureSecurityGroupDeleted(clusterName, service); err != nil {

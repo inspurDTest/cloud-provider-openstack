@@ -349,6 +349,7 @@ func CreateListener(client *gophercloud.ServiceClient, lbID string, opts listene
 		return nil, err
 	}
 
+	// 等待listener创建完成
 	if _, err := WaitActiveAndGetLoadBalancer(client, lbID); err != nil {
 		return nil, fmt.Errorf("failed to wait for load balancer %s ACTIVE after creating listener: %v", lbID, err)
 	}
@@ -495,6 +496,7 @@ func GetPoolByListener(client *gophercloud.ServiceClient, lbID, listenerID strin
 				}
 			}
 		}
+		// TODO 为啥最多一个pool?
 		if len(listenerPools) > 1 {
 			return false, cpoerrors.ErrMultipleResults
 		}
