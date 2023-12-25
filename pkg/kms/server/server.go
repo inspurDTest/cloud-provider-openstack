@@ -9,8 +9,8 @@ import (
 	"golang.org/x/sys/unix"
 	"google.golang.org/grpc"
 	gcfg "gopkg.in/gcfg.v1"
-	"k8s.io/cloud-provider-openstack/pkg/kms/barbican"
-	"k8s.io/cloud-provider-openstack/pkg/kms/encryption/aescbc"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/kms/barbican"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/kms/encryption/aescbc"
 	"k8s.io/klog/v2"
 	pb "k8s.io/kms/apis/v2"
 )

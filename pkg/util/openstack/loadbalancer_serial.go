@@ -8,8 +8,8 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	klog "k8s.io/klog/v2"
 
-	cpoutil "k8s.io/cloud-provider-openstack/pkg/util"
-	cpoerrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
+	cpoutil "github.com/inspurDTest/cloud-provider-openstack/pkg/util"
+	cpoerrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
 )
 
 func memberExists(members []pools.Member, addr string, port int) bool {

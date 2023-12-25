@@ -22,7 +22,7 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"k8s.io/cloud-provider-openstack/pkg/csi/cinder/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/cinder/openstack"
 )
 
 var fakeCs *controllerServer

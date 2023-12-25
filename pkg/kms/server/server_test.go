@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"golang.org/x/net/context"
-	"k8s.io/cloud-provider-openstack/pkg/kms/barbican"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/kms/barbican"
 	pb "k8s.io/kms/apis/v2"
 )
 

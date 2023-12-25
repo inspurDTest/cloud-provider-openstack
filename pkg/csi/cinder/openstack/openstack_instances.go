@@ -2,7 +2,7 @@ package openstack
 
 import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"k8s.io/cloud-provider-openstack/pkg/metrics"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/metrics"
 )
 
 // GetInstanceByID returns server with specified instanceID

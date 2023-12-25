@@ -22,9 +22,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/manilaclient"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/options"
-	clouderrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/options"
+	clouderrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
 )
 
 type volumeCreator interface {

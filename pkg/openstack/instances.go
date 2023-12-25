@@ -38,12 +38,12 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/validation"
-	cloudprovider "k8s.io/cloud-provider"
-	"k8s.io/cloud-provider-openstack/pkg/client"
-	"k8s.io/cloud-provider-openstack/pkg/metrics"
-	"k8s.io/cloud-provider-openstack/pkg/util"
-	"k8s.io/cloud-provider-openstack/pkg/util/errors"
-	"k8s.io/cloud-provider-openstack/pkg/util/metadata"
+	cloudprovider "github.com/inspurDTest/cloud-provider"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/metrics"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/metadata"
 )
 
 // Instances encapsulates an implementation of Instances for OpenStack.

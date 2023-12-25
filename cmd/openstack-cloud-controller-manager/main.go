@@ -26,11 +26,11 @@ import (
 
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/wait"
-	cloudprovider "k8s.io/cloud-provider"
-	"k8s.io/cloud-provider/app"
-	"k8s.io/cloud-provider/app/config"
-	"k8s.io/cloud-provider/names"
-	"k8s.io/cloud-provider/options"
+	cloudprovider "github.com/inspurDTest/cloud-provider"
+	"github.com/inspurDTest/cloud-provider/app"
+	"github.com/inspurDTest/cloud-provider/app/config"
+	"github.com/inspurDTest/cloud-provider/names"
+	"github.com/inspurDTest/cloud-provider/options"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"
 	_ "k8s.io/component-base/metrics/prometheus/restclient" // for client metric registration
@@ -38,8 +38,8 @@ import (
 	"k8s.io/klog/v2"
 	_ "k8s.io/kubernetes/pkg/features" // add the kubernetes feature gates
 
-	"k8s.io/cloud-provider-openstack/pkg/openstack"
-	"k8s.io/cloud-provider-openstack/pkg/version"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/version"
 )
 
 func main() {

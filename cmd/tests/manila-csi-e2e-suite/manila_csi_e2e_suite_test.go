@@ -7,7 +7,7 @@ import (
 
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	_ "k8s.io/cloud-provider-openstack/tests/e2e/csi/manila"
+	_ "github.com/inspurDTest/cloud-provider-openstack/tests/e2e/csi/manila"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/test/e2e/framework"
 	frameworkconfig "k8s.io/kubernetes/test/e2e/framework/config"

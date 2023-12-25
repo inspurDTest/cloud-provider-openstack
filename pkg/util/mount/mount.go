@@ -29,7 +29,7 @@ import (
 	"k8s.io/mount-utils"
 	"k8s.io/utils/exec"
 
-	"k8s.io/cloud-provider-openstack/pkg/util/blockdevice"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/blockdevice"
 )
 
 const (

@@ -23,8 +23,8 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/runtimeconfig"
-	manilautil "k8s.io/cloud-provider-openstack/pkg/csi/manila/util"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/runtimeconfig"
+	manilautil "github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/util"
 	"k8s.io/klog/v2"
 )
 

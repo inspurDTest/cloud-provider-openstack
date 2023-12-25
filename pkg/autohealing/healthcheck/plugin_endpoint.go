@@ -27,7 +27,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	log "k8s.io/klog/v2"
 
-	"k8s.io/cloud-provider-openstack/pkg/autohealing/utils"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/autohealing/utils"
 )
 
 const (

@@ -25,10 +25,10 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"k8s.io/cloud-provider-openstack/pkg/client"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/options"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/shareadapters"
-	clouderrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/options"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/shareadapters"
+	clouderrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
 	"k8s.io/klog/v2"
 )
 

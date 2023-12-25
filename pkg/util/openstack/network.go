@@ -26,8 +26,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 	"github.com/gophercloud/gophercloud/pagination"
 
-	"k8s.io/cloud-provider-openstack/pkg/metrics"
-	cpoerrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/metrics"
+	cpoerrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
 )
 
 // GetNetworkExtensions returns an extension map.

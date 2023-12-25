@@ -25,8 +25,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharetypes"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots"
-	"k8s.io/cloud-provider-openstack/pkg/client"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/manilaclient"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
 )
 
 var (

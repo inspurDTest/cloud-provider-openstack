@@ -54,11 +54,11 @@ import (
 	klog "k8s.io/klog/v2"
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 
-	"k8s.io/cloud-provider-openstack/pkg/ingress/config"
-	"k8s.io/cloud-provider-openstack/pkg/ingress/controller/openstack"
-	"k8s.io/cloud-provider-openstack/pkg/ingress/utils"
-	cpoerrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
-	openstackutil "k8s.io/cloud-provider-openstack/pkg/util/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/ingress/config"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/ingress/controller/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/ingress/utils"
+	cpoerrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
+	openstackutil "github.com/inspurDTest/cloud-provider-openstack/pkg/util/openstack"
 )
 
 const (

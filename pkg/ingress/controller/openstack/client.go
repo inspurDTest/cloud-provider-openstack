@@ -23,8 +23,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack"
 	log "github.com/sirupsen/logrus"
 
-	"k8s.io/cloud-provider-openstack/pkg/client"
-	"k8s.io/cloud-provider-openstack/pkg/ingress/config"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/ingress/config"
 )
 
 // OpenStack is an implementation of cloud provider Interface for OpenStack.

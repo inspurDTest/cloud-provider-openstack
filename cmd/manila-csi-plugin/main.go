@@ -24,11 +24,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/csiclient"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/manilaclient"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/runtimeconfig"
-	"k8s.io/cloud-provider-openstack/pkg/version"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/csiclient"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/runtimeconfig"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/version"
 	"k8s.io/component-base/cli"
 	"k8s.io/klog/v2"
 )

@@ -23,8 +23,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"golang.org/x/sys/unix"
-	"k8s.io/cloud-provider-openstack/pkg/kms/server"
-	"k8s.io/cloud-provider-openstack/pkg/version"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/kms/server"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/version"
 	"k8s.io/component-base/cli"
 	"k8s.io/klog/v2"
 )

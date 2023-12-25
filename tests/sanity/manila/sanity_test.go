@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	"github.com/kubernetes-csi/csi-test/v5/pkg/sanity"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila"
 )
 
 func TestDriver(t *testing.T) {

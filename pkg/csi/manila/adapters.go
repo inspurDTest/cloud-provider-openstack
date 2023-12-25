@@ -19,7 +19,7 @@ package manila
 import (
 	"strings"
 
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/shareadapters"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/shareadapters"
 	"k8s.io/klog/v2"
 )
 

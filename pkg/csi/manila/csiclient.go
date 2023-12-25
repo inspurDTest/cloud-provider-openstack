@@ -20,7 +20,7 @@ import (
 	"context"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/csiclient"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/csiclient"
 )
 
 type csiNodeCapabilitySet map[csi.NodeServiceCapability_RPC_Type]bool

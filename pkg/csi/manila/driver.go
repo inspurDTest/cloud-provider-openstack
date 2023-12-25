@@ -29,9 +29,9 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/kubernetes-csi/csi-lib-utils/protosanitizer"
 	"google.golang.org/grpc"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/csiclient"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/manilaclient"
-	"k8s.io/cloud-provider-openstack/pkg/version"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/csiclient"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/version"
 	"k8s.io/klog/v2"
 )
 

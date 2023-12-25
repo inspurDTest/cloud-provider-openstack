@@ -17,7 +17,7 @@ limitations under the License.
 package config
 
 import (
-	"k8s.io/cloud-provider-openstack/pkg/client"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
 )
 
 // Config struct contains ingress controller configuration

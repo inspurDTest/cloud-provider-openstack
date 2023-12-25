@@ -24,8 +24,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/manilaclient"
-	clouderrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
+	clouderrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
 	"k8s.io/klog/v2"
 )
 

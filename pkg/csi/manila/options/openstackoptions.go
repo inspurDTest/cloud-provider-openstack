@@ -17,8 +17,8 @@ limitations under the License.
 package options
 
 import (
-	"k8s.io/cloud-provider-openstack/pkg/client"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/validator"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/validator"
 )
 
 var (

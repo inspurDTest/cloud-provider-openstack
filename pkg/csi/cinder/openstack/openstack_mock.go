@@ -21,7 +21,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/stretchr/testify/mock"
-	"k8s.io/cloud-provider-openstack/pkg/util/metadata"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/metadata"
 )
 
 var fakeVol1 = volumes.Volume{

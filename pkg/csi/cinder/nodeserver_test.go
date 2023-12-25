@@ -24,9 +24,9 @@ import (
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/cloud-provider-openstack/pkg/csi/cinder/openstack"
-	"k8s.io/cloud-provider-openstack/pkg/util/metadata"
-	"k8s.io/cloud-provider-openstack/pkg/util/mount"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/cinder/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/metadata"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/mount"
 )
 
 var fakeNs *nodeServer

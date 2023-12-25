@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/kubernetes-csi/csi-test/v5/pkg/sanity"
-	"k8s.io/cloud-provider-openstack/pkg/csi/cinder"
-	"k8s.io/cloud-provider-openstack/pkg/csi/cinder/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/cinder"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/cinder/openstack"
 )
 
 // start sanity test for driver

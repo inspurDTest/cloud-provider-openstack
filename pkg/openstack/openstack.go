@@ -34,17 +34,17 @@ import (
 	gcfg "gopkg.in/gcfg.v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
-	cloudprovider "k8s.io/cloud-provider"
+	cloudprovider "github.com/inspurDTest/cloud-provider"
 	"k8s.io/klog/v2"
 
 	"k8s.io/client-go/informers"
 	coreinformers "k8s.io/client-go/informers/core/v1"
-	"k8s.io/cloud-provider-openstack/pkg/client"
-	"k8s.io/cloud-provider-openstack/pkg/metrics"
-	"k8s.io/cloud-provider-openstack/pkg/util"
-	"k8s.io/cloud-provider-openstack/pkg/util/errors"
-	"k8s.io/cloud-provider-openstack/pkg/util/metadata"
-	openstackutil "k8s.io/cloud-provider-openstack/pkg/util/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/metrics"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/metadata"
+	openstackutil "github.com/inspurDTest/cloud-provider-openstack/pkg/util/openstack"
 )
 
 const (

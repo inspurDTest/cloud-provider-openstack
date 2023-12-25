@@ -27,7 +27,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots"
 	"github.com/gophercloud/gophercloud/pagination"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/cloud-provider-openstack/pkg/metrics"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/metrics"
 	"k8s.io/klog/v2"
 )
 

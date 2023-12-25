@@ -17,7 +17,7 @@ limitations under the License.
 package main
 
 import (
-	"k8s.io/cloud-provider-openstack/pkg/autohealing/cmd"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/autohealing/cmd"
 )
 
 func main() {

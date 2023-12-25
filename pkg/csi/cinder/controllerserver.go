@@ -29,9 +29,9 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"k8s.io/cloud-provider-openstack/pkg/csi/cinder/openstack"
-	"k8s.io/cloud-provider-openstack/pkg/util"
-	cpoerrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/cinder/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util"
+	cpoerrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
 	"k8s.io/klog/v2"
 )
 

@@ -32,11 +32,11 @@ import (
 	"k8s.io/klog/v2"
 	utilpath "k8s.io/utils/path"
 
-	"k8s.io/cloud-provider-openstack/pkg/csi/cinder/openstack"
-	"k8s.io/cloud-provider-openstack/pkg/util/blockdevice"
-	cpoerrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
-	"k8s.io/cloud-provider-openstack/pkg/util/metadata"
-	"k8s.io/cloud-provider-openstack/pkg/util/mount"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/cinder/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/blockdevice"
+	cpoerrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/metadata"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/mount"
 	mountutil "k8s.io/mount-utils"
 )
 

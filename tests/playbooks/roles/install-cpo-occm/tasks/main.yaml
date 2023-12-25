@@ -3,7 +3,7 @@
   shell:
     executable: /bin/bash
     cmd: |
-      rm -rf $GOPATH/src/k8s.io/cloud-provider-openstack
+      rm -rf $GOPATH/src/github.com/inspurDTest/cloud-provider-openstack
       mkdir -p $GOPATH/src/k8s.io; cd $_
       git clone https://github.com/kubernetes/cloud-provider-openstack
       cd cloud-provider-openstack
@@ -15,7 +15,7 @@
   shell:
     executable: /bin/bash
     cmd: |
-      cd $GOPATH/src/k8s.io/cloud-provider-openstack
+      cd $GOPATH/src/github.com/inspurDTest/cloud-provider-openstack
 
       make push-multiarch-image-openstack-cloud-controller-manager \
         ARCHS='amd64' \
@@ -170,7 +170,7 @@
   shell:
     executable: /bin/bash
     cmd: |
-      cd $GOPATH/src/k8s.io/cloud-provider-openstack
+      cd $GOPATH/src/github.com/inspurDTest/cloud-provider-openstack
 
       # GATEWAY_IP is the default value in devstack
       GATEWAY_IP=172.24.5.1 \

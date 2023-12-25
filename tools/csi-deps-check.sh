@@ -36,6 +36,6 @@ set -o errexit
 /bin/btrfs --version
 
 # This utils are using by
-# go mod k8s.io/cloud-provider-openstack/pkg/util/mount
+# go mod github.com/inspurDTest/cloud-provider-openstack/pkg/util/mount
 /bin/udevadm --version
 /bin/findmnt -V

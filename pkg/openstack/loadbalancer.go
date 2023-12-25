@@ -48,16 +48,16 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/kubernetes"
-	cloudprovider "k8s.io/cloud-provider"
+	cloudprovider "github.com/inspurDTest/cloud-provider"
 	"k8s.io/klog/v2"
 	netutils "k8s.io/utils/net"
 	"k8s.io/utils/strings/slices"
 
-	"k8s.io/cloud-provider-openstack/pkg/metrics"
-	cpoutil "k8s.io/cloud-provider-openstack/pkg/util"
-	cpoerrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
-	netsets "k8s.io/cloud-provider-openstack/pkg/util/net/sets"
-	openstackutil "k8s.io/cloud-provider-openstack/pkg/util/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/metrics"
+	cpoutil "github.com/inspurDTest/cloud-provider-openstack/pkg/util"
+	cpoerrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
+	netsets "github.com/inspurDTest/cloud-provider-openstack/pkg/util/net/sets"
+	openstackutil "github.com/inspurDTest/cloud-provider-openstack/pkg/util/openstack"
 )
 
 // Note: when creating a new Loadbalancer (VM), it can take some time before it is ready for use,
@@ -1319,7 +1319,7 @@ func (lbaas *LbaasV2) buildPoolCreateOpt(listenerProtocol string, service *corev
 // buildBatchUpdateMemberOpts returns v2pools.BatchUpdateMemberOpts array for Services and Nodes alongside a list of member names
 func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(port corev1.ServicePort, nodes []*corev1.Node, svcConf *serviceConfig, allMembers map[int]v2pools.BatchUpdateMemberOpts) ([]v2pools.BatchUpdateMemberOpts, sets.Set[string], error) {
 	var members []v2pools.BatchUpdateMemberOpts
-	newMembers := sets.New[string]()
+	newMembers := sets.New [string]()
 
 	member := allMembers[int(port.NodePort)]
 	members = append(members, member)

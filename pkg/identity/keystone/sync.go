@@ -33,7 +33,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 
-	cpoutil "k8s.io/cloud-provider-openstack/pkg/util"
+	cpoutil "github.com/inspurDTest/cloud-provider-openstack/pkg/util"
 )
 
 const (

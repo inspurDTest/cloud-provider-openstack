@@ -26,8 +26,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots"
 	"google.golang.org/grpc/codes"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/manilaclient"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/options"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/options"
 	"k8s.io/klog/v2"
 )
 

@@ -30,8 +30,8 @@ import (
 
 	"golang.org/x/term"
 
-	"k8s.io/cloud-provider-openstack/pkg/identity/keystone"
-	"k8s.io/cloud-provider-openstack/pkg/version"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/identity/keystone"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/version"
 	kflag "k8s.io/component-base/cli/flag"
 	"k8s.io/klog/v2"
 )

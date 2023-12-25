@@ -88,7 +88,7 @@ copy_deps /bin/btrfs
 cp /bin/btrfs* ${DEST}/bin/
 
 # This utils are using by
-# go mod k8s.io/cloud-provider-openstack/pkg/util/mount
+# go mod github.com/inspurDTest/cloud-provider-openstack/pkg/util/mount
 copy_deps /bin/udevadm
 copy_deps /lib/udev/rules.d
 copy_deps /bin/findmnt

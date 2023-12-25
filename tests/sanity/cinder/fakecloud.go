@@ -10,9 +10,9 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"k8s.io/cloud-provider-openstack/pkg/csi/cinder"
-	"k8s.io/cloud-provider-openstack/pkg/csi/cinder/openstack"
-	"k8s.io/cloud-provider-openstack/pkg/util/metadata"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/cinder"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/cinder/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/metadata"
 )
 
 type cloud struct {

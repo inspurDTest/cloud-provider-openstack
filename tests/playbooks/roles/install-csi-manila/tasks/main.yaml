@@ -3,7 +3,7 @@
   shell:
     executable: /bin/bash
     cmd: |
-      rm -rf {{ ansible_user_dir }}/src/k8s.io/cloud-provider-openstack
+      rm -rf {{ ansible_user_dir }}/src/github.com/inspurDTest/cloud-provider-openstack
       mkdir -p {{ ansible_user_dir }}/src/k8s.io; cd $_
       git clone https://github.com/kubernetes/cloud-provider-openstack
       cd cloud-provider-openstack
@@ -14,7 +14,7 @@
   shell:
     executable: /bin/bash
     cmd: |
-      cd {{ ansible_user_dir }}/src/k8s.io/cloud-provider-openstack
+      cd {{ ansible_user_dir }}/src/github.com/inspurDTest/cloud-provider-openstack
 
       make push-multiarch-image-manila-csi-plugin \
         ARCHS='amd64' \
@@ -118,7 +118,7 @@
   shell:
     executable: /bin/bash
     cmd: |
-      cd {{ ansible_user_dir }}/src/k8s.io/cloud-provider-openstack/charts/manila-csi-plugin
+      cd {{ ansible_user_dir }}/src/github.com/inspurDTest/cloud-provider-openstack/charts/manila-csi-plugin
       cat <<EOF >> override-helm-values.yaml
       csimanila:
         image:
@@ -214,7 +214,7 @@
 
       set +x; source {{ devstack_workdir }}/openrc demo demo > /dev/null; set -x
 
-      cd {{ ansible_user_dir }}/src/k8s.io/cloud-provider-openstack
+      cd {{ ansible_user_dir }}/src/github.com/inspurDTest/cloud-provider-openstack
 
       # GATEWAY_IP is the default value in devstack
       mkdir -p /var/log/csi-pod

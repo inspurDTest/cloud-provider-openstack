@@ -27,8 +27,8 @@ import (
 	tokens3 "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/gophercloud/utils/client"
 	certutil "k8s.io/client-go/util/cert"
-	osClient "k8s.io/cloud-provider-openstack/pkg/client"
-	"k8s.io/cloud-provider-openstack/pkg/version"
+	osClient "github.com/inspurDTest/cloud-provider-openstack/pkg/client"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/version"
 	"k8s.io/klog/v2"
 )
 

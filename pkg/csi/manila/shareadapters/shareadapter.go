@@ -18,8 +18,8 @@ package shareadapters
 
 import (
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/manilaclient"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/options"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/options"
 )
 
 type GrantAccessArgs struct {

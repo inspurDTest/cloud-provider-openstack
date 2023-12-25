@@ -27,9 +27,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"k8s.io/cloud-provider-openstack/pkg/ingress/config"
-	"k8s.io/cloud-provider-openstack/pkg/ingress/controller"
-	"k8s.io/cloud-provider-openstack/pkg/version"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/ingress/config"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/ingress/controller"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/version"
 	"k8s.io/component-base/cli"
 	"k8s.io/klog/v2"
 )

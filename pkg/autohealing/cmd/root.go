@@ -33,9 +33,9 @@ import (
 	"k8s.io/component-base/cli"
 	log "k8s.io/klog/v2"
 
-	"k8s.io/cloud-provider-openstack/pkg/autohealing/config"
-	"k8s.io/cloud-provider-openstack/pkg/autohealing/controller"
-	"k8s.io/cloud-provider-openstack/pkg/version"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/autohealing/config"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/autohealing/controller"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/version"
 )
 
 var (

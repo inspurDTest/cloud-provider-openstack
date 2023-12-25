@@ -31,7 +31,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 
-	"k8s.io/cloud-provider-openstack/pkg/ingress/utils"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/ingress/utils"
 )
 
 func (os *OpenStack) getFloatingIPs(listOpts floatingips.ListOpts) ([]floatingips.FloatingIP, error) {

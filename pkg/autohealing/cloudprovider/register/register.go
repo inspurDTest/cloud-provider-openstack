@@ -24,10 +24,10 @@ import (
 	gopenstack "github.com/gophercloud/gophercloud/openstack"
 	"k8s.io/client-go/kubernetes"
 
-	"k8s.io/cloud-provider-openstack/pkg/autohealing/cloudprovider"
-	"k8s.io/cloud-provider-openstack/pkg/autohealing/cloudprovider/openstack"
-	"k8s.io/cloud-provider-openstack/pkg/autohealing/config"
-	"k8s.io/cloud-provider-openstack/pkg/client"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/autohealing/cloudprovider"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/autohealing/cloudprovider/openstack"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/autohealing/config"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
 )
 
 func registerOpenStack(cfg config.Config, kubeClient kubernetes.Interface) (cloudprovider.CloudProvider, error) {

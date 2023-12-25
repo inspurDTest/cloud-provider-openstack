@@ -27,10 +27,10 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/options"
-	"k8s.io/cloud-provider-openstack/pkg/csi/manila/shareadapters"
-	"k8s.io/cloud-provider-openstack/pkg/util"
-	clouderrors "k8s.io/cloud-provider-openstack/pkg/util/errors"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/options"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/shareadapters"
+	"github.com/inspurDTest/cloud-provider-openstack/pkg/util"
+	clouderrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"
 	"k8s.io/klog/v2"
 )
 
