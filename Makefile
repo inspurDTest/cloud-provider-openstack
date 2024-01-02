@@ -24,7 +24,7 @@ SOURCES := Makefile go.mod go.sum $(shell find $(DEST) -name '*.go' 2>/dev/null)
 HAS_GOX := $(shell command -v gox;)
 GOX_PARALLEL ?= 3
 
-TARGETS		?= linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x
+TARGETS		?= linux/amd64 linux/arm64
 DIST_DIRS	= find * -type d -exec
 
 TEMP_DIR	:=$(shell mktemp -d)
@@ -40,23 +40,14 @@ LDFLAGS		:= "-w -s -X 'k8s.io/component-base/version.gitVersion=$(VERSION)' -X '
 GOX_LDFLAGS	:= $(shell echo "$(LDFLAGS) -extldflags \"-static\"")
 REGISTRY	?= registry.k8s.io/provider-os
 IMAGE_OS	?= linux
-IMAGE_NAMES	?= openstack-cloud-controller-manager \
-				cinder-csi-plugin \
-				k8s-keystone-auth \
-				octavia-ingress-controller \
-				manila-csi-plugin \
-				barbican-kms-plugin \
-				magnum-auto-healer
+IMAGE_NAMES	?= openstack-cloud-controller-manager
+
 ARCH		?= amd64
-ARCHS		?= amd64 arm arm64 ppc64le s390x
-BUILD_CMDS	?= openstack-cloud-controller-manager \
-				cinder-csi-plugin \
-				k8s-keystone-auth \
-				octavia-ingress-controller \
-				manila-csi-plugin \
-				barbican-kms-plugin \
-				magnum-auto-healer \
-				client-keystone-auth
+ARCHS		?= amd64 arm64
+BUILD_CMDS	?= openstack-cloud-controller-manager
+
+# This option is for running docker manifest command
+export DOCKER_CLI_EXPERIMENTAL := enabled
 
 # CTI targets
 
@@ -97,7 +88,7 @@ test-manila-csi-sanity: work
 
 # kept for compatibility reasons.
 fmt: check
-lint: check
+lint: checkupload-images
 vet: check
 
 cover: work
@@ -169,6 +160,8 @@ build-local-image-%:
 build-local-images: $(addprefix build-image-,$(IMAGE_NAMES))
 
 # Build a single image for all architectures in ARCHS and push it to REGISTRY
+# https://waynerv.com/posts/building-multi-architecture-images-with-docker-buildx/
+# registry：type=image,push=true 的精简表示
 push-multiarch-image-%:
 	$(CONTAINER_ENGINE) buildx build --output type=registry \
 		--build-arg VERSION=$(VERSION) \
