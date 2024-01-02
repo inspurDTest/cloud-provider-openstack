@@ -4,23 +4,11 @@ on:
   pull_request:
     branches:
     - release-*
-    paths-ignore:
-      - 'docs/**'
-      - 'charts/**'
-      - 'hack/**'
-      - 'tools/**'
-      - '**.md'
-      - '**.yaml'
+
   push:
     branches:
     - release-*
-    paths-ignore:
-      - 'docs/**'
-      - 'charts/**'
-      - 'hack/**'
-      - 'tools/**'
-      - '**.md'
-      - '**.yaml'
+    
 jobs:
   release:
     runs-on: ubuntu-latest
