@@ -28,7 +28,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Login to Docker
-          run: |
+        run: |
             docker login -u inspurwyd  -p  dckr_pat_yMRt21vCZj0PlDl14xJiqSOHeVg
 
       - name: build & publish images
