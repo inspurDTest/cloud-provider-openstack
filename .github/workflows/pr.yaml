@@ -3,7 +3,7 @@ name: PR
 on:
   pull_request:
     branches:
-      - release-1.28
+      - '*'
     paths-ignore:
       - 'docs/**'
       - 'charts/**'
