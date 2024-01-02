@@ -8,7 +8,7 @@ on:
   push:
     branches:
     - release-*
-    
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -30,4 +30,4 @@ jobs:
 
       - name: build & publish images
         run: |
-          REGISTRY=docker.io/inspurwyd ARCHS='amd64 arm64' GOOS=linux VERSION=${cat VERSION} make  push-multiarch-images
+          REGISTRY=docker.io/inspurwyd ARCHS='amd64 arm64' GOOS=linux VERSION=${{cat VERSION}} make  push-multiarch-images
