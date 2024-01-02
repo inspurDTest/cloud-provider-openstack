@@ -3,7 +3,7 @@ name: PR
 on:
   pull_request:
     branches:
-      - *
+    - release-*
     paths-ignore:
       - 'docs/**'
       - 'charts/**'
@@ -13,7 +13,7 @@ on:
       - '**.yaml'
   push:
     branches:
-      - *
+    - release-*
     paths-ignore:
       - 'docs/**'
       - 'charts/**'
