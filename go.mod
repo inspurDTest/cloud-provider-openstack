@@ -1,8 +1,6 @@
 module github.com/inspurDTest/cloud-provider-openstack
 
-go 1.21.1
-
-toolchain go1.21.3
+go 1.21
 
 require (
 	github.com/container-storage-interface/spec v1.9.0
@@ -168,7 +166,7 @@ require (
 )
 
 replace (
-	github.com/inspurDTest/cloud-provider => github.com/inspurDTest/cloud-provider v0.29.0-9
+	github.com/inspurDTest/cloud-provider => github.com/inspurDTest/cloud-provider v0.29.0-10
 	k8s.io/api => k8s.io/api v0.28.3
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.28.3
 	k8s.io/apimachinery => k8s.io/apimachinery v0.28.3
