@@ -1,6 +1,6 @@
 module github.com/inspurDTest/cloud-provider-openstack
 
-go 1.21.3
+go 1.21
 
 require (
 	github.com/container-storage-interface/spec v1.9.0
