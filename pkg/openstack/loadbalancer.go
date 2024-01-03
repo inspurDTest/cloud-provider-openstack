@@ -1315,7 +1315,7 @@ func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(port corev1.ServicePort, nodes 
 	}
 
 	members = append(members, member...)
-	newMembers.Insert(fmt.Sprintf("%s-%d-%d-%d", member[0].Name, member[0].Address, member[0].ProtocolPort), len(members))
+	newMembers.Insert(fmt.Sprintf("%s-%d-%d-%d", member[0].Name, member[0].Address, member[0].ProtocolPort, len(members)))
 	//newMembers.Insert(fmt.Sprintf("%s-%s-%d-%d", node.Name, addr, member.ProtocolPort, svcConf.healthCheckNodePort))
 	return members, newMembers, nil
 }
