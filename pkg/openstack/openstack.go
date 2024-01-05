@@ -227,6 +227,8 @@ func ReadConfig(config io.Reader) (Config, error) {
 	cfg.LoadBalancer.MaxSharedLB = 2
 	cfg.LoadBalancer.ProviderRequiresSerialAPICalls = false
 
+
+	// 将config的secret中配置信息填充道cfg中包括子网id
 	err := gcfg.FatalOnly(gcfg.ReadInto(&cfg, config))
 	if err != nil {
 		return Config{}, err
