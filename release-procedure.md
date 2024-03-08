@@ -30,3 +30,4 @@ Cloudbuild should build new images to gcr.io/k8s-staging-provider-os.
 5. Make PR https://github.com/kubernetes/k8s.io/blob/main/k8s.gcr.io/images/k8s-staging-provider-os/images.yaml to promote gcr.io images to registry.k8s.io.
 
 6. Make release notes and publish the release after the new images are published.
+   
