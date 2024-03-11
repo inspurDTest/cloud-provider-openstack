@@ -44,7 +44,7 @@ require (
 
 // the below fixes the "go list -m all" execution
 replace (
-	github.com/inspurDTest/cloud-provider => github.com/inspurDTest/cloud-provider v0.29.0-21
+	github.com/inspurDTest/cloud-provider => github.com/inspurDTest/cloud-provider v0.29.0-22
 	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.28.4
 	k8s.io/dynamic-resource-allocation => k8s.io/dynamic-resource-allocation v0.28.4
 	k8s.io/endpointslice => k8s.io/endpointslice v0.28.4
