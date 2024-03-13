@@ -1248,7 +1248,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	if err != nil {
 		return nil, err
 	}
-
+	klog.V(1).Infof("curMembers is: %v, newMembers is %v", curMembers, newMembers)
 	if !curMembers.Equal(newMembers) {
 		klog.V(2).Infof("Updating %d members for pool %s", len(members), pool.ID)
 		if err := openstackutil.BatchUpdatePoolMembers(lbaas.lb, lbID, pool.ID, members); err != nil {
@@ -1815,7 +1815,7 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 			if len(endpoint.Addresses) == 0 {
 				continue
 			}
-
+			klog.V(1).InfoS("for addressIndex, address := range endpoint.Addresses {")
 			for addressIndex, address := range endpoint.Addresses {
 				// endpointSliceName + Protocol + port + addressIndex
 				// memeber_endpointSliceName_protocol_port_addressIndex_[lbName]
@@ -1828,7 +1828,7 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 					// TODO 进一步确认是否需要
 					Tags:         []string{memberName},
 				}
-
+				klog.V(1).InfoS("for addressIndex, address := range endpoint.Addresses  member {: %v", member)
 				batchUpdateMemberOpts := members[int(*port.Port)]
 				if len(batchUpdateMemberOpts) == 0 {
 					batchUpdateMemberOpts = make([]v2pools.BatchUpdateMemberOpts, 0)
@@ -1837,6 +1837,7 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 				members[int(*port.Port)] = batchUpdateMemberOpts
 				//memberMap := map[int]v2pools.BatchUpdateMemberOpts{int(*port.Port):member}
 				//members = append(members, &memberMap)
+				klog.V(1).InfoS("for addressIndex, address := range endpoint.Addresses Port{: %v", members)
 			}
 
 		}
@@ -1941,7 +1942,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 	if err := lbaas.checkListenerPorts(service, curListenerMapping, lbName); err != nil {
 		return nil, err
 	}
-
+	klog.V(1).InfoS("begin get member")
 	lbmembers := lbaas.getMemeberOptions(svcConf, endpointSlices)
 
 	// 生成listener+pool+memeber
