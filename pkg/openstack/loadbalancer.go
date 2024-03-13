@@ -1626,7 +1626,7 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 	//svcConf.lbID = getStringFromServiceAnnotation(service, ServiceAnnotationLoadBalancerID, "")
 	svcConf.supportLBTags = openstackutil.IsOctaviaFeatureSupported(lbaas.lb, openstackutil.OctaviaFeatureTags, lbaas.opts.LBProvider)
 	if !svcConf.supportLBTags {
-		return loadbalancer, fmt.Errorf("loadbalance not support tags")
+		//return loadbalancer, fmt.Errorf("loadbalance not support tags")
 	}
 
 	svcConf.internal = true
