@@ -62,7 +62,7 @@ import (
 // Note: when creating a new Loadbalancer (VM), it can take some time before it is ready for use,
 // this timeout is used for waiting until the Loadbalancer provisioning status goes to ACTIVE state.
 const (
-	servicePrefix                       = "k8s_"
+	servicePrefix                       = "k8s"
 	defaultLoadBalancerSourceRangesIPv4 = "0.0.0.0/0"
 	defaultLoadBalancerSourceRangesIPv6 = "::/0"
 	activeStatus                        = "ACTIVE"
@@ -107,12 +107,16 @@ const (
 	ServiceAnnotationLoadBalancerOldID = "loadbalancer.openstack.org/load-balancer-old-id"
 
 	// Octavia resources name formats
-	lbFormat       = "%s%s_%s_%s"
-	listenerFormat = "listener_%d_%s"
-	poolFormat     = "pool_%d_%s"
+	//k8s_lbName_svcNs_svcName
+	lbFormat       = "%s_%s_%s_%s"
+	//listenerFormat = "listener_%d_%s"
+	//k8s_lbName_svcNs_svcName_portIndex
+	listenerFormat = "%s_%d"
+	//k8s_lbName_svcNs_svcName_portIndex
+	poolFormat     = "%s_%d"
 	monitorFormat  = "monitor_%d_%s"
-	// memeber_endpointSliceName_protocol_port_addressIndex_[lbName]
-	memeberFormat = "memeber_%s_%s_%s_%s_%s"
+	// namespace_endpointSliceName_protocol_port_addressIndex
+	memeberFormat = "%s_%s_%s_%s_%d"
 
 	NamespaceAnnotationLoadBalancerMemberSubnetID = "inspur.com/pod-subnet"
 )
@@ -519,7 +523,7 @@ func (lbaas *LbaasV2) createOctaviaLoadBalancer(name, clusterName string, servic
 
 	if !lbaas.opts.ProviderRequiresSerialAPICalls {
 		for portIndex, port := range service.Spec.Ports {
-			listenerCreateOpt := lbaas.buildListenerCreateOpt(port, svcConf, cpoutil.Sprintf255(listenerFormat, portIndex, name))
+			listenerCreateOpt := lbaas.buildListenerCreateOpt(port, svcConf, cpoutil.Sprintf255(listenerFormat, name, portIndex ))
 			members, newMembers, err := lbaas.buildBatchUpdateMemberOpts(port, nodes, svcConf, nil)
 			if err != nil {
 				return nil, err
@@ -600,8 +604,8 @@ func (lbaas *LbaasV2) GetLoadBalancer(ctx context.Context, clusterName string, s
 }
 
 // GetLoadBalancerName returns the constructed load balancer name.
-func (lbaas *LbaasV2) GetLoadBalancerName(_ context.Context, clusterName string, service *corev1.Service) string {
-	return cpoutil.Sprintf255(lbFormat, servicePrefix, clusterName, service.Namespace, service.Name)
+func (lbaas *LbaasV2) GetLoadBalancerName(_ context.Context, lbName string, service *corev1.Service) string {
+	return cpoutil.Sprintf255(lbFormat, servicePrefix, lbName, service.Namespace, service.Name)
 }
 
 // getLoadBalancerLegacyName returns the legacy load balancer name for backward compatibility.
@@ -1820,8 +1824,8 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 			klog.V(1).Infof("for addressIndex, address := range endpoint.Addresses {")
 			for addressIndex, address := range endpoint.Addresses {
 				// endpointSliceName + Protocol + port + addressIndex
-				// memeber_endpointSliceName_protocol_port_addressIndex_[lbName]
-				memberName := cpoutil.Sprintf255(memeberFormat, eps.Name, port.Protocol, port.Port, addressIndex, svcConf.lbName)
+				// // namespace_endpointSliceName_protocol_port_addressIndex
+				memberName := cpoutil.Sprintf255(memeberFormat, eps.Namespace, eps.Name, *port.Protocol, *port.Port, addressIndex)
 				member := v2pools.BatchUpdateMemberOpts{
 					Address:      address,
 					ProtocolPort: int(*port.Port),
@@ -1916,7 +1920,8 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 	svcConf.lbID = lbID
 
 	// Use more meaningful name for the load balancer but still need to check the legacy name for backward compatibility.
-	lbName := lbaas.GetLoadBalancerName(ctx, clusterName, service)
+	// lbName:k8s_svcNs_svcName
+	lbName := lbaas.GetLoadBalancerName(ctx, loadbalancer.Name, service)
 	svcConf.lbName = lbName
 	//serviceName := fmt.Sprintf("%s/%s", service.Namespace, service.Name)
 
@@ -1944,18 +1949,19 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 	if err := lbaas.checkListenerPorts(service, curListenerMapping, lbName); err != nil {
 		return nil, err
 	}
-	klog.V(1).Infof("begin get member")
+
 	lbmembers := lbaas.getMemeberOptions(svcConf, endpointSlices)
+	klog.V(1).Infof("lbmembers is %v", lbmembers)
 
 	// 生成listener+pool+memeber
 	for portIndex, port := range service.Spec.Ports {
-		listener, err := lbaas.ensureOctaviaListener(loadbalancer.ID, cpoutil.Sprintf255(listenerFormat, portIndex, lbName), curListenerMapping, port, svcConf, service)
+		listener, err := lbaas.ensureOctaviaListener(loadbalancer.ID, cpoutil.Sprintf255(listenerFormat, lbName, portIndex), curListenerMapping, port, svcConf, service)
 		if err != nil {
 			return nil, err
 		}
 
 		// 包含pool和memeber
-		pool, err := lbaas.ensureOctaviaPool(loadbalancer.ID, cpoutil.Sprintf255(poolFormat, portIndex, lbName), listener, service, port, nodes, svcConf, lbmembers)
+		pool, err := lbaas.ensureOctaviaPool(loadbalancer.ID, cpoutil.Sprintf255(poolFormat, lbName, portIndex), listener, service, port, nodes, svcConf, lbmembers)
 		if err != nil {
 			return nil, err
 		}
@@ -2103,7 +2109,7 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 	}
 
 	// Now, we have a load balancer.
-
+	lbName := lbaas.GetLoadBalancerName(ctx, loadbalancer.Name, service)
 	// Get all listeners for this loadbalancer, by "port&protocol".
 	lbListeners := make(map[listenerKey]listeners.Listener)
 	for _, l := range loadbalancer.Listeners {
@@ -2122,7 +2128,7 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 			return fmt.Errorf("loadbalancer %s does not contain required listener for port %d and protocol %s", loadbalancer.ID, port.Port, port.Protocol)
 		}
 
-		pool, err := lbaas.ensureOctaviaPool(loadbalancer.ID, cpoutil.Sprintf255(poolFormat, portIndex, loadbalancer.Name), &listener, service, port, nodes, svcConf, nil)
+		pool, err := lbaas.ensureOctaviaPool(loadbalancer.ID, cpoutil.Sprintf255(poolFormat, lbName, portIndex), &listener, service, port, nodes, svcConf, nil)
 		if err != nil {
 			return err
 		}
