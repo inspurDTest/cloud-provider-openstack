@@ -2362,6 +2362,8 @@ func (lbaas *LbaasV2) deleteFIPIfCreatedByProvider(fip *floatingips.FloatingIP, 
 
 // handle service delete && remove loadbalanceId ,add oldloadbalanceId
 func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName string, service *corev1.Service, lbID string) error {
+	klog.V(1).Infof("begin to delete LoadBalancer service: %v, lbID: %v", service, lbID)
+
 	lbName := lbaas.GetLoadBalancerName(ctx, clusterName, service)
 	// loadbalance由CMP创建，serivce和lb只能通过serivce的注解关联上
 	//legacyName := lbaas.getLoadBalancerLegacyName(ctx, clusterName, service)
@@ -2380,6 +2382,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 	}
 
 	loadbalancer, err = openstackutil.GetLoadbalancerByID(lbaas.lb, svcConf.lbID)
+	klog.V(1).Infof("deleting LoadBalancer loadbalancer: %v", loadbalancer)
 	if err == cpoerrors.ErrNotFound {
 		//return fmt.Errorf("load balancer %s is not exist by lbID", svcConf.lbID)
 		// load balancer不存在时，默认已被删除
@@ -2399,6 +2402,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 
 	// get all listeners associated with this loadbalancer
 	listenerList, err := openstackutil.GetListenersByLoadBalancerID(lbaas.lb, loadbalancer.ID)
+	klog.V(1).Infof("deleting LoadBalancer listenerList is :  %v", listenerList)
 	if err != nil {
 		return fmt.Errorf("error getting LB %s listeners: %v", loadbalancer.ID, err)
 	}
@@ -2431,6 +2435,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		if err != nil && err != cpoerrors.ErrNotFound {
 			return fmt.Errorf("error getting pool for listener %s: %v", listener.ID, err)
 		}
+
 		if pool != nil {
 			if pool.MonitorID != "" {
 				monitorIDs = append(monitorIDs, pool.MonitorID)
