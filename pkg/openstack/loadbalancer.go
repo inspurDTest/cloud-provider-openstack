@@ -116,7 +116,7 @@ const (
 	poolFormat     = "%s_%d"
 	monitorFormat  = "monitor_%d_%s"
 	// namespace_endpointSliceName_protocol_port_addressIndex
-	memeberFormat = "%s_%s_%s_%s_%d"
+	memeberFormat = "%s_%s_%s_%d_%d"
 
 	NamespaceAnnotationLoadBalancerMemberSubnetID = "inspur.com/pod-subnet"
 )
