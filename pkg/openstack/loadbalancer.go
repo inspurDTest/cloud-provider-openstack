@@ -63,6 +63,7 @@ import (
 // this timeout is used for waiting until the Loadbalancer provisioning status goes to ACTIVE state.
 const (
 	servicePrefix                       = "k8s"
+	serviceClusterId                    = "192549fb-ddd7-5449-a33d-d3f302a680f3"
 	defaultLoadBalancerSourceRangesIPv4 = "0.0.0.0/0"
 	defaultLoadBalancerSourceRangesIPv6 = "::/0"
 	activeStatus                        = "ACTIVE"
@@ -108,7 +109,7 @@ const (
 
 	// Octavia resources name formats
 	//k8s_svcNs_svcName 是否需要加上vip
-	lbFormat       = "%s_%s_%s"
+	lbFormat       = "%s_%s_%s_%s"
 	//listenerFormat = "listener_%d_%s"
 	//lbName_portIndex => k8s_svcNs_svcName_portIndex
 	listenerFormat = "%s_%d"
@@ -605,7 +606,7 @@ func (lbaas *LbaasV2) GetLoadBalancer(ctx context.Context, clusterName string, s
 
 // GetLoadBalancerName returns the constructed load balancer name.
 func (lbaas *LbaasV2) GetLoadBalancerName(_ context.Context, lbName string, service *corev1.Service) string {
-	return cpoutil.Sprintf255(lbFormat, servicePrefix, service.Namespace, service.Name)
+	return cpoutil.Sprintf255(lbFormat, servicePrefix, serviceClusterId ,service.Namespace, service.Name)
 }
 
 // getLoadBalancerLegacyName returns the legacy load balancer name for backward compatibility.
