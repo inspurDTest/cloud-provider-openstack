@@ -107,12 +107,12 @@ const (
 	ServiceAnnotationLoadBalancerOldID = "loadbalancer.openstack.org/load-balancer-old-id"
 
 	// Octavia resources name formats
-	//k8s_lbName_svcNs_svcName
-	lbFormat       = "%s_%s_%s_%s"
+	//k8s_svcNs_svcName 是否需要加上vip
+	lbFormat       = "%s_%s_%s"
 	//listenerFormat = "listener_%d_%s"
-	//k8s_lbName_svcNs_svcName_portIndex
+	//lbName_portIndex => k8s_svcNs_svcName_portIndex
 	listenerFormat = "%s_%d"
-	//k8s_lbName_svcNs_svcName_portIndex
+	//lbName_portIndex => k8s_svcNs_svcName_portIndex
 	poolFormat     = "%s_%d"
 	monitorFormat  = "monitor_%d_%s"
 	// namespace_endpointSliceName_protocol_port_addressIndex
@@ -605,7 +605,7 @@ func (lbaas *LbaasV2) GetLoadBalancer(ctx context.Context, clusterName string, s
 
 // GetLoadBalancerName returns the constructed load balancer name.
 func (lbaas *LbaasV2) GetLoadBalancerName(_ context.Context, lbName string, service *corev1.Service) string {
-	return cpoutil.Sprintf255(lbFormat, servicePrefix, lbName, service.Namespace, service.Name)
+	return cpoutil.Sprintf255(lbFormat, servicePrefix, service.Namespace, service.Name)
 }
 
 // getLoadBalancerLegacyName returns the legacy load balancer name for backward compatibility.
@@ -1780,10 +1780,13 @@ func (lbaas *LbaasV2) checkListenerPorts(service *corev1.Service, curListenerMap
 			// the listener was created by this Service.
 			// 存在且tag不属于当前service时，则认为已经存在非当前service的listener（openstack||其他service）,
 			//  且只要有一个存在，则整体抛错，不再继续进行
-			if !cpoutil.Contains(listener.Tags, lbName) {
-				fmt.Errorf("conflict: the listener port %d already exists", svcPort.Port)
-				return fmt.Errorf("conflict: the listener port %d already exists", svcPort.Port)
+			for _, tag := range listener.Tags{
+				if strings.Contains(tag, lbName+"_"){
+					fmt.Errorf("conflict: the listener port %d already exists", svcPort.Port)
+					return fmt.Errorf("conflict: the listener port %d already exists", svcPort.Port)
+				}
 			}
+
 		}
 	}
 
@@ -1796,7 +1799,6 @@ func (lbaas *LbaasV2) getMemeberOptions(svcConf *serviceConfig, endpointSlices [
 	if len(svcConf.lbMemberSubnetID) == 0 {
 		return members
 	}
-	klog.V(1).Infof("for _, eps := range endpointSlices {")
 	for _, eps := range endpointSlices {
 		// Skip if not lb expect preferredIPFamily
 		if string(eps.AddressType) != string(svcConf.preferredIPFamily) {
@@ -1817,11 +1819,10 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 			if endpoint.Conditions.Ready == nil || (endpoint.Conditions.Ready != nil && !*endpoint.Conditions.Ready) {
 				continue
 			}
-			klog.V(1).Infof("\tif len(endpoint.Addresses) == 0 {")
 			if len(endpoint.Addresses) == 0 {
 				continue
 			}
-			klog.V(1).Infof("for addressIndex, address := range endpoint.Addresses {")
+
 			for addressIndex, address := range endpoint.Addresses {
 				// endpointSliceName + Protocol + port + addressIndex
 				// // namespace_endpointSliceName_protocol_port_addressIndex
@@ -1834,7 +1835,6 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 					// TODO 进一步确认是否需要
 					Tags:         []string{memberName},
 				}
-				klog.V(1).Infof("for addressIndex, address := range endpoint.Addresses  member {: %v", member)
 				batchUpdateMemberOpts := members[int(*port.Port)]
 				if len(batchUpdateMemberOpts) == 0 {
 					batchUpdateMemberOpts = make([]v2pools.BatchUpdateMemberOpts, 0)
@@ -1843,7 +1843,7 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 				members[int(*port.Port)] = batchUpdateMemberOpts
 				//memberMap := map[int]v2pools.BatchUpdateMemberOpts{int(*port.Port):member}
 				//members = append(members, &memberMap)
-				klog.V(1).Infof("for addressIndex, address := range endpoint.Addresses Port{: %v", members)
+				klog.V(1).Infof("members is %v", members)
 			}
 
 		}
@@ -2364,6 +2364,10 @@ func (lbaas *LbaasV2) deleteFIPIfCreatedByProvider(fip *floatingips.FloatingIP, 
 func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName string, service *corev1.Service, lbID string) error {
 	klog.V(1).Infof("begin to delete LoadBalancer service: %v, lbID: %v", service, lbID)
 
+	if service.Status.Size() == 0 || service.Status.LoadBalancer.Size() == 0{
+		klog.V(1).Infof("service not bond to lb" )
+		return nil
+	}
 	lbName := lbaas.GetLoadBalancerName(ctx, clusterName, service)
 	// loadbalance由CMP创建，serivce和lb只能通过serivce的注解关联上
 	//legacyName := lbaas.getLoadBalancerLegacyName(ctx, clusterName, service)
@@ -2422,10 +2426,12 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 			Port:     int(port.Port),
 		}]
 		// 这一部分不需要改，通过listener的tags以及key确认listener的归属
-		if isPresent && cpoutil.Contains(listener.Tags, lbName) {
+		klog.V(1).Infof("listener.Tags:  %v, lbName: %v", listener.Tags, lbName)
+		if isPresent && strings.Contains(listener.Name, lbName+"_"){
 			listenersToDelete = append(listenersToDelete, *listener)
 		}
 	}
+	klog.V(1).Infof("listenersToDelete:  %v", listenersToDelete)
 	listenerList = listenersToDelete
 
 	// get all pools (and health monitors) associated with this loadbalancer
