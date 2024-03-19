@@ -1782,12 +1782,11 @@ func (lbaas *LbaasV2) checkListenerPorts(service *corev1.Service, curListenerMap
 			// 存在且tag不属于当前service时，则认为已经存在非当前service的listener（openstack||其他service）,
 			//  且只要有一个存在，则整体抛错，不再继续进行
 			for _, tag := range listener.Tags{
-				if strings.Contains(tag, lbName+"_"){
-					fmt.Errorf("conflict: the listener port %d already exists", svcPort.Port)
-					return fmt.Errorf("conflict: the listener port %d already exists", svcPort.Port)
+				if !strings.Contains(tag, lbName){
+					fmt.Errorf("conflict: the listener port %d already by %v  used", svcPort.Port, listener.Name)
+					return fmt.Errorf("conflict: the listener port %d already by %v  used", svcPort.Port, listener.Name)
 				}
 			}
-
 		}
 	}
 
