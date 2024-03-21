@@ -38,6 +38,7 @@ import (
 )
 
 type AuthOpts struct {
+
 	AuthURL          string                   `gcfg:"auth-url" mapstructure:"auth-url" name:"os-authURL" dependsOn:"os-password|os-trustID|os-applicationCredentialSecret|os-clientCertPath"`
 	UserID           string                   `gcfg:"user-id" mapstructure:"user-id" name:"os-userID" value:"optional" dependsOn:"os-password"`
 	Username         string                   `name:"os-userName" value:"optional" dependsOn:"os-password"`
