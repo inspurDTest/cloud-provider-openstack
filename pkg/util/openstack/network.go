@@ -17,14 +17,14 @@ limitations under the License.
 package openstack
 
 import (
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
-	neutronports "github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/extensions"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/extensions/external"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/networks"
+	neutronports "github.com/inspurDTest/gophercloud/openstack/networking/v2/ports"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/subnets"
+	"github.com/inspurDTest/gophercloud/pagination"
 
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/metrics"
 	cpoerrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"

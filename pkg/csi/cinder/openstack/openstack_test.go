@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gophercloud/gophercloud"
+	"github.com/inspurDTest/gophercloud"
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 )

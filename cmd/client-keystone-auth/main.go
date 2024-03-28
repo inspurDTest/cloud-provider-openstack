@@ -23,8 +23,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/utils/openstack/clientconfig"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/utils/openstack/clientconfig"
 	"github.com/spf13/pflag"
 	"k8s.io/component-base/logs"
 

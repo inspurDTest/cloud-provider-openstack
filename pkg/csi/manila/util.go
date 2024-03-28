@@ -22,9 +22,9 @@ import (
 	"strings"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/messages"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/messages"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/snapshots"
 	"google.golang.org/grpc/codes"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/options"

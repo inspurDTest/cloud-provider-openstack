@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	th "github.com/gophercloud/gophercloud/testhelper"
+	th "github.com/inspurDTest/gophercloud/testhelper"
 )
 
 func TestSyncConfigFromFile(t *testing.T) {

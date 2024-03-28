@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/messages"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharetypes"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/messages"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/sharetypes"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/snapshots"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
 )

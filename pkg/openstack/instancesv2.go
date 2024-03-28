@@ -21,8 +21,8 @@ import (
 	"fmt"
 	sysos "os"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack/compute/v2/servers"
 	v1 "k8s.io/api/core/v1"
 	cloudprovider "github.com/inspurDTest/cloud-provider"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"

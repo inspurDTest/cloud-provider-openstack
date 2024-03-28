@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/snapshots"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
 	clouderrors "github.com/inspurDTest/cloud-provider-openstack/pkg/util/errors"

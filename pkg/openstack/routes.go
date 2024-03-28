@@ -21,10 +21,10 @@ import (
 	"net"
 	"sync"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/extraroutes"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/extensions/layer3/extraroutes"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/ports"
 
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"

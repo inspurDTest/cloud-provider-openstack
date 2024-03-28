@@ -1,7 +1,7 @@
 package openstack
 
 import (
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/inspurDTest/gophercloud/openstack/compute/v2/servers"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/metrics"
 )
 

@@ -19,10 +19,10 @@ package keystone
 import (
 	"fmt"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/groups"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack/identity/v3/groups"
+	"github.com/inspurDTest/gophercloud/openstack/identity/v3/tokens"
+	"github.com/inspurDTest/gophercloud/openstack/identity/v3/users"
 	"k8s.io/apiserver/pkg/authentication/user"
 )
 

@@ -17,9 +17,9 @@ limitations under the License.
 package openstack
 
 import (
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/inspurDTest/gophercloud/openstack/blockstorage/v3/snapshots"
+	"github.com/inspurDTest/gophercloud/openstack/blockstorage/v3/volumes"
+	"github.com/inspurDTest/gophercloud/openstack/compute/v2/servers"
 	"github.com/stretchr/testify/mock"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/util/metadata"
 )

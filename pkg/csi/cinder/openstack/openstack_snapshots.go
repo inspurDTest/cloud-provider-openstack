@@ -24,8 +24,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/inspurDTest/gophercloud/openstack/blockstorage/v3/snapshots"
+	"github.com/inspurDTest/gophercloud/pagination"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/metrics"
 	"k8s.io/klog/v2"

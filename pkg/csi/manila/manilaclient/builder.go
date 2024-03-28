@@ -22,9 +22,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/apiversions"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/apiversions"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
 )
 

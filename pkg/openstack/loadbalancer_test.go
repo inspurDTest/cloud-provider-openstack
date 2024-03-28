@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/rules"
+	"github.com/inspurDTest/gophercloud/openstack/loadbalancer/v2/listeners"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/extensions/security/rules"
 )
 
 type testPopListener struct {

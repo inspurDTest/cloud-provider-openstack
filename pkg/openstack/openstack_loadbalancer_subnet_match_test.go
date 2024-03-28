@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/subnets"
 	"github.com/stretchr/testify/assert"
 )
 

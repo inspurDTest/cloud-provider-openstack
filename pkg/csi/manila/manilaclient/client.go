@@ -17,14 +17,14 @@ limitations under the License.
 package manilaclient
 
 import (
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/messages"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharetypes"
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots"
-	shares_utils "github.com/gophercloud/utils/openstack/sharedfilesystems/v2/shares"
-	sharetypes_utils "github.com/gophercloud/utils/openstack/sharedfilesystems/v2/sharetypes"
-	snapshots_utils "github.com/gophercloud/utils/openstack/sharedfilesystems/v2/snapshots"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/messages"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/sharetypes"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/snapshots"
+	shares_utils "github.com/inspurDTest/utils/openstack/sharedfilesystems/v2/shares"
+	sharetypes_utils "github.com/inspurDTest/utils/openstack/sharedfilesystems/v2/sharetypes"
+	snapshots_utils "github.com/inspurDTest/utils/openstack/sharedfilesystems/v2/snapshots"
 )
 
 type Client struct {

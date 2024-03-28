@@ -19,8 +19,8 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"

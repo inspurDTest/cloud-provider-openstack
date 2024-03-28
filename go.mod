@@ -5,10 +5,10 @@ go 1.21
 require (
 	github.com/container-storage-interface/spec v1.8.0
 	github.com/go-chi/chi/v5 v5.0.8
-	github.com/gophercloud/gophercloud v1.6.0
-	github.com/gophercloud/utils v0.0.0-20230330070308-5bd5e1d608f8
 	github.com/hashicorp/go-version v1.6.0
 	github.com/inspurDTest/cloud-provider v0.0.0-00010101000000-000000000000
+	github.com/inspurDTest/gophercloud v1.6.0-2
+	github.com/inspurDTest/utils v1.0.0
 	github.com/kubernetes-csi/csi-lib-utils v0.13.0
 	github.com/kubernetes-csi/csi-test/v5 v5.0.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -34,7 +34,7 @@ require (
 	k8s.io/apiserver v0.29.0
 	k8s.io/client-go v0.29.0
 	k8s.io/component-base v0.29.0
-	k8s.io/klog/v2 v2.110.1
+	k8s.io/klog/v2 v2.120.1
 	k8s.io/kms v0.29.0
 	k8s.io/kubernetes v1.29.0
 	k8s.io/mount-utils v0.29.0
@@ -74,7 +74,7 @@ require (
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/go-logr/logr v1.3.0 // indirect
+	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
@@ -92,6 +92,7 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 // indirect
+	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

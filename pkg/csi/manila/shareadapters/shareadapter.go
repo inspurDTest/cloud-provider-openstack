@@ -17,7 +17,7 @@ limitations under the License.
 package shareadapters
 
 import (
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/shares"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/manilaclient"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/csi/manila/options"
 )

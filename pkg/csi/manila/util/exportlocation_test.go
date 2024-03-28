@@ -16,7 +16,7 @@ package util
 import (
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
+	"github.com/inspurDTest/gophercloud/openstack/sharedfilesystems/v2/shares"
 )
 
 // Tests FindExportLocation with AnyExportLocation predicate

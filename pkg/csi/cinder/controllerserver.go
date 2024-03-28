@@ -21,8 +21,8 @@ import (
 	"strconv"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
+	"github.com/inspurDTest/gophercloud/openstack/blockstorage/v3/snapshots"
+	"github.com/inspurDTest/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/kubernetes-csi/csi-lib-utils/protosanitizer"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"

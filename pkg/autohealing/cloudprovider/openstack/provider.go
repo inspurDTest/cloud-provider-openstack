@@ -24,16 +24,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/clusters"
-	"github.com/gophercloud/gophercloud/openstack/containerinfra/v1/nodegroups"
-	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stackresources"
-	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stacks"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack/blockstorage/v2/volumes"
+	"github.com/inspurDTest/gophercloud/openstack/compute/v2/extensions/startstop"
+	"github.com/inspurDTest/gophercloud/openstack/compute/v2/extensions/volumeattach"
+	"github.com/inspurDTest/gophercloud/openstack/compute/v2/servers"
+	"github.com/inspurDTest/gophercloud/openstack/containerinfra/v1/clusters"
+	"github.com/inspurDTest/gophercloud/openstack/containerinfra/v1/nodegroups"
+	"github.com/inspurDTest/gophercloud/openstack/orchestration/v1/stackresources"
+	"github.com/inspurDTest/gophercloud/openstack/orchestration/v1/stacks"
+	"github.com/inspurDTest/gophercloud/pagination"
 	uuid "github.com/pborman/uuid"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -422,7 +422,7 @@ func (provider CloudProvider) Repair(nodes []healthcheck.NodeInfo) error {
 			// Wait 10 seconds to make sure Magnum has already got the request
 			// to avoid sending all of the resize API calls at the same time.
 			time.Sleep(10 * time.Second)
-			// TODO: Ignore the result value until https://github.com/gophercloud/gophercloud/pull/1649 is merged.
+			// TODO: Ignore the result value until https://github.com/inspurDTest/gophercloud/pull/1649 is merged.
 			//if ret.Err != nil {
 			//	return fmt.Errorf("failed to resize cluster %s, error: %v", clusterName, ret.Err)
 			//}

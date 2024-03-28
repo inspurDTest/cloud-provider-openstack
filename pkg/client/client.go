@@ -24,12 +24,12 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/extensions/trusts"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
-	"github.com/gophercloud/utils/client"
-	"github.com/gophercloud/utils/openstack/clientconfig"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack"
+	"github.com/inspurDTest/gophercloud/openstack/identity/v3/extensions/trusts"
+	"github.com/inspurDTest/gophercloud/openstack/identity/v3/tokens"
+	"github.com/inspurDTest/utils/client"
+	"github.com/inspurDTest/utils/openstack/clientconfig"
 
 	"k8s.io/apimachinery/pkg/util/net"
 	"k8s.io/client-go/util/cert"
@@ -43,6 +43,10 @@ type AuthOpts struct {
 	UserID           string                   `gcfg:"user-id" mapstructure:"user-id" name:"os-userID" value:"optional" dependsOn:"os-password"`
 	Username         string                   `name:"os-userName" value:"optional" dependsOn:"os-password"`
 	Password         string                   `name:"os-password" value:"optional" dependsOn:"os-domainID|os-domainName,os-projectID|os-projectName,os-userID|os-userName"`
+	GrantType        string                   `name:"grant-type" value:"optional" dependsOn:"grant-type"`
+	ClientId         string                   `name:"client-id" value:"optional" dependsOn:"client-id"`
+	NetworkEndpoint  string                   `name:"network-endpoint" value:"optional" dependsOn:"network-endpoint"`
+
 	TenantID         string                   `gcfg:"tenant-id" mapstructure:"project-id" name:"os-projectID" value:"optional" dependsOn:"os-password|os-clientCertPath"`
 	TenantName       string                   `gcfg:"tenant-name" mapstructure:"project-name" name:"os-projectName" value:"optional" dependsOn:"os-password|os-clientCertPath"`
 	TrustID          string                   `gcfg:"trust-id" mapstructure:"trust-id" name:"os-trustID" value:"optional"`
@@ -109,10 +113,10 @@ func (l Logger) Printf(format string, args ...interface{}) {
 	if debugger {
 		var skip int
 		var found bool
-		var gc = "/github.com/gophercloud/gophercloud"
+		var gc = "/github.com/inspurDTest/gophercloud"
 
 		// detect the depth of the actual function, which calls gophercloud code
-		// 10 is the common depth from the logger to "github.com/gophercloud/gophercloud"
+		// 10 is the common depth from the logger to "github.com/inspurDTest/gophercloud"
 		for i := 10; i <= 20; i++ {
 			if _, file, _, ok := runtime.Caller(i); ok && !found && strings.Contains(file, gc) {
 				found = true
@@ -167,6 +171,47 @@ func (authOpts AuthOpts) ToAuthOptions() gophercloud.AuthOptions {
 	return *ao
 }
 
+func (authOpts AuthOpts) ToAuthOptionsIAM() gophercloud.AuthOptions {
+	opts := clientconfig.ClientOpts{
+		// this is needed to disable the clientconfig.AuthOptions func env detection
+		EnvPrefix: "_",
+		Cloud:     authOpts.Cloud,
+		AuthInfo: &clientconfig.AuthInfo{
+			AuthURL:                     authOpts.AuthURL,
+			UserID:                      authOpts.UserID,
+			Username:                    authOpts.Username,
+			Password:                    authOpts.Password,
+			//王玉东添加
+			GrantType:					 authOpts.GrantType,
+			ClientId: 					 authOpts.ClientId,
+			NetworkEndpoint:             authOpts.NetworkEndpoint,
+			ProjectID:                   authOpts.TenantID,
+			ProjectName:                 authOpts.TenantName,
+			DomainID:                    authOpts.DomainID,
+			DomainName:                  authOpts.DomainName,
+			ProjectDomainID:             authOpts.TenantDomainID,
+			ProjectDomainName:           authOpts.TenantDomainName,
+			UserDomainID:                authOpts.UserDomainID,
+			UserDomainName:              authOpts.UserDomainName,
+			ApplicationCredentialID:     authOpts.ApplicationCredentialID,
+			ApplicationCredentialName:   authOpts.ApplicationCredentialName,
+			ApplicationCredentialSecret: authOpts.ApplicationCredentialSecret,
+		},
+	}
+
+	ao, err := clientconfig.AuthOptions(&opts)
+	if err != nil {
+		klog.V(1).Infof("Error parsing auth: %s", err)
+		return gophercloud.AuthOptions{}
+	}
+
+	// Persistent service, so we need to be able to renew tokens.
+	ao.AllowReauth = true
+
+	return *ao
+}
+
+
 func (authOpts AuthOpts) ToAuth3Options() tokens.AuthOptions {
 	ao := authOpts.ToAuthOptions()
 
@@ -217,6 +262,10 @@ func ReadClouds(authOpts *AuthOpts) error {
 	authOpts.UserID = replaceEmpty(authOpts.UserID, cloud.AuthInfo.UserID)
 	authOpts.Username = replaceEmpty(authOpts.Username, cloud.AuthInfo.Username)
 	authOpts.Password = replaceEmpty(authOpts.Password, cloud.AuthInfo.Password)
+	authOpts.GrantType = replaceEmpty(authOpts.GrantType, cloud.AuthInfo.GrantType)
+	authOpts.ClientId = replaceEmpty(authOpts.ClientId, cloud.AuthInfo.ClientId)
+	authOpts.NetworkEndpoint = replaceEmpty(authOpts.NetworkEndpoint, cloud.AuthInfo.NetworkEndpoint)
+
 	authOpts.TenantID = replaceEmpty(authOpts.TenantID, cloud.AuthInfo.ProjectID)
 	authOpts.TenantName = replaceEmpty(authOpts.TenantName, cloud.AuthInfo.ProjectName)
 	authOpts.DomainID = replaceEmpty(authOpts.DomainID, cloud.AuthInfo.DomainID)
@@ -243,7 +292,8 @@ func NewOpenStackClient(cfg *AuthOpts, userAgent string, extraUserAgent ...strin
 	if err != nil {
 		return nil, err
 	}
-
+    // 王玉东 header是否需要改
+    // 王玉东 暂时没有看到iam有version
 	ua := gophercloud.UserAgent{}
 	ua.Prepend(fmt.Sprintf("%s/%s", userAgent, version.Version))
 	for _, data := range extraUserAgent {
@@ -252,6 +302,8 @@ func NewOpenStackClient(cfg *AuthOpts, userAgent string, extraUserAgent ...strin
 	provider.UserAgent = ua
 	klog.V(4).Infof("Using user-agent %s", ua.Join())
 
+
+	// 王玉东 没有CA
 	var caPool *x509.CertPool
 	if cfg.CAFile != "" {
 		// read and parse CA certificate from file
@@ -308,8 +360,10 @@ func NewOpenStackClient(cfg *AuthOpts, userAgent string, extraUserAgent ...strin
 
 		return provider, err
 	}
-
-	opts := cfg.ToAuthOptions()
+    // 王玉东 换成IAM的入参
+	//opts := cfg.ToAuthOptions()
+	opts := cfg.ToAuthOptionsIAM()
+	klog.V(4).Infof("iam opts value: %+v", opts)
 	err = openstack.Authenticate(provider, opts)
 
 	return provider, err

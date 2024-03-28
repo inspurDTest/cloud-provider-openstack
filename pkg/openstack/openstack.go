@@ -24,12 +24,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/availabilityzones"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/portsecurity"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/trunk_details"
-	neutronports "github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack/compute/v2/extensions/availabilityzones"
+	"github.com/inspurDTest/gophercloud/openstack/compute/v2/servers"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/extensions/portsecurity"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/extensions/trunk_details"
+	neutronports "github.com/inspurDTest/gophercloud/openstack/networking/v2/ports"
 	"github.com/spf13/pflag"
 	gcfg "gopkg.in/gcfg.v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -181,6 +181,7 @@ type Config struct {
 func init() {
 	metrics.RegisterMetrics("occm")
 
+	klog.V(4).Infof("begin init ccm provider client ")
 	cloudprovider.RegisterCloudProvider(ProviderName, func(config io.Reader) (cloudprovider.Interface, error) {
 		cfg, err := ReadConfig(config)
 		if err != nil {
@@ -235,6 +236,8 @@ func ReadConfig(config io.Reader) (Config, error) {
 	}
 
 	klog.V(5).Infof("Config, loaded from the config file:")
+
+	// 王玉东 加载鉴权地址、用户名、密码等
 	client.LogCfg(cfg.Global)
 
 	if cfg.Global.UseClouds {
@@ -283,6 +286,7 @@ func checkOpenStackOpts(openstackOpts *OpenStack) error {
 
 // NewOpenStack creates a new new instance of the openstack struct from a config struct
 func NewOpenStack(cfg Config) (*OpenStack, error) {
+	// 王玉东 使用http client
 	provider, err := client.NewOpenStackClient(&cfg.Global, "openstack-cloud-controller-manager", userAgentData...)
 	if err != nil {
 		return nil, err

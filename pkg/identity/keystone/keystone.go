@@ -25,9 +25,9 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack"
-	"github.com/gophercloud/gophercloud/openstack/utils"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack"
+	"github.com/inspurDTest/gophercloud/openstack/utils"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
 	apiv1 "k8s.io/api/core/v1"

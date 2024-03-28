@@ -20,8 +20,8 @@ package register
 import (
 	"fmt"
 
-	"github.com/gophercloud/gophercloud"
-	gopenstack "github.com/gophercloud/gophercloud/openstack"
+	"github.com/inspurDTest/gophercloud"
+	gopenstack "github.com/inspurDTest/gophercloud/openstack"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/autohealing/cloudprovider"

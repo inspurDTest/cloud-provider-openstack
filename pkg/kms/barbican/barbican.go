@@ -1,9 +1,9 @@
 package barbican
 
 import (
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack"
-	"github.com/gophercloud/gophercloud/openstack/keymanager/v1/secrets"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack"
+	"github.com/inspurDTest/gophercloud/openstack/keymanager/v1/secrets"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/client"
 )
 

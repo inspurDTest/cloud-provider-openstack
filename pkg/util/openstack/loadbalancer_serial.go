@@ -3,8 +3,8 @@ package openstack
 import (
 	"fmt"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
+	"github.com/inspurDTest/gophercloud"
+	"github.com/inspurDTest/gophercloud/openstack/loadbalancer/v2/pools"
 	apiv1 "k8s.io/api/core/v1"
 	klog "k8s.io/klog/v2"
 

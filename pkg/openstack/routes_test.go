@@ -21,8 +21,8 @@ import (
 	"net"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/inspurDTest/gophercloud/openstack/compute/v2/servers"
+	"github.com/inspurDTest/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
