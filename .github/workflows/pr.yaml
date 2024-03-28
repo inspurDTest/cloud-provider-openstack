@@ -3,11 +3,11 @@ name: PR
 on:
   pull_request:
     branches:
-    - release-*
+    - iam
 
   push:
     branches:
-    - release-*
+    - iam
 
 jobs:
   release:
