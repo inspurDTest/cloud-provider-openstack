@@ -30,4 +30,4 @@ jobs:
 
       - name: build & publish images
         run: |
-          REGISTRY=docker.io/inspurwyd ARCHS='amd64 arm64' GOOS=linux VERSION='v1.28.1' make  push-multiarch-images
+          REGISTRY=docker.io/inspurwyd ARCHS='amd64 arm64' GOOS=linux VERSION='viam1.0.0' make  push-multiarch-images
