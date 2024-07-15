@@ -30,4 +30,4 @@ jobs:
 
       - name: build & publish images
         run: |
-          REGISTRY=registry.cn-hangzhou.aliyuncs.com/testwydimage ARCHS='amd64 arm64' GOOS=linux VERSION='viam.0.0' make  push-multiarch-images
+          REGISTRY=registry.cn-hangzhou.aliyuncs.com/testwydimage ARCHS='amd64 arm64' GOOS=linux VERSION='v9.0.0' make  push-multiarch-images
