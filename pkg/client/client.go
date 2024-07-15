@@ -83,6 +83,10 @@ func LogCfg(authOpts AuthOpts) {
 	klog.V(5).Infof("AuthURL: %s", authOpts.AuthURL)
 	klog.V(5).Infof("UserID: %s", authOpts.UserID)
 	klog.V(5).Infof("Username: %s", authOpts.Username)
+	klog.V(5).Infof("GrantType: %s", authOpts.GrantType)
+	klog.V(5).Infof("ClientId: %s", authOpts.ClientId)
+	klog.V(5).Infof("NetworkEndpoint: %s", authOpts.NetworkEndpoint)
+
 	klog.V(5).Infof("TenantID: %s", authOpts.TenantID)
 	klog.V(5).Infof("TenantName: %s", authOpts.TenantName)
 	klog.V(5).Infof("TrustID: %s", authOpts.TrustID)

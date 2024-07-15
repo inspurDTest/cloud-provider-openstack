@@ -26,8 +26,8 @@ jobs:
 
       - name: Login to Docker
         run: |
-            docker login -u inspurwyd  -p  dckr_pat_yMRt21vCZj0PlDl14xJiqSOHeVg
+            docker login --username=${{ secrets.USERNAME_ALI }} registry.cn-hangzhou.aliyuncs.com -p ${{ secrets.PASSWORD_ALI }}
 
       - name: build & publish images
         run: |
-          REGISTRY=docker.io/inspurwyd ARCHS='amd64 arm64' GOOS=linux VERSION='v9.0.0' make  push-multiarch-images
+          REGISTRY=registry.cn-hangzhou.aliyuncs.com/testwydimage ARCHS='amd64 arm64' GOOS=linux VERSION='viam.0.0' make  push-multiarch-images
