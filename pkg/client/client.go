@@ -347,6 +347,7 @@ func NewOpenStackClient(cfg *AuthOpts, userAgent string, extraUserAgent ...strin
 			Logger: &Logger{},
 		}
 	}
+	provider.HTTPClient.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify:true}}
 
 	if cfg.TrustID != "" {
 		opts := cfg.ToAuth3Options()
