@@ -20,6 +20,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"k8s.io/apimachinery/pkg/util/net"
+	"net/http"
 	"runtime"
 	"strings"
 
@@ -341,7 +343,7 @@ func NewOpenStackClient(cfg *AuthOpts, userAgent string, extraUserAgent ...strin
 		config.Certificates = []tls.Certificate{cert}
 	}
 
-	//provider.HTTPClient.Transport = net.SetOldTransportDefaults(&http.Transport{TLSClientConfig: config})
+	provider.HTTPClient.Transport = net.SetOldTransportDefaults(&http.Transport{TLSClientConfig: config})
 
 	if klog.V(6).Enabled() {
 		provider.HTTPClient.Transport = &client.RoundTripper{
