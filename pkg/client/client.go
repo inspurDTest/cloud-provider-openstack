@@ -20,7 +20,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"net/http"
 	"runtime"
 	"strings"
 
@@ -31,9 +30,8 @@ import (
 	"github.com/inspurDTest/utils/client"
 	"github.com/inspurDTest/utils/openstack/clientconfig"
 
-	"k8s.io/apimachinery/pkg/util/net"
-	"k8s.io/client-go/util/cert"
 	"github.com/inspurDTest/cloud-provider-openstack/pkg/version"
+	"k8s.io/client-go/util/cert"
 	"k8s.io/klog/v2"
 )
 
@@ -323,8 +321,12 @@ func NewOpenStackClient(cfg *AuthOpts, userAgent string, extraUserAgent ...strin
 		}
 	}
 
-	config := &tls.Config{}
-	config.InsecureSkipVerify = cfg.TLSInsecure == "true"
+	//config := &tls.Config{}
+	//config.InsecureSkipVerify = cfg.TLSInsecure == "true"
+	config := &tls.Config{
+		InsecureSkipVerify: true, // 测试时跳过证书验证，生产环境中请移除此行
+	}
+
 
 	if caPool != nil {
 		config.RootCAs = caPool
@@ -339,7 +341,7 @@ func NewOpenStackClient(cfg *AuthOpts, userAgent string, extraUserAgent ...strin
 		config.Certificates = []tls.Certificate{cert}
 	}
 
-	provider.HTTPClient.Transport = net.SetOldTransportDefaults(&http.Transport{TLSClientConfig: config})
+	//provider.HTTPClient.Transport = net.SetOldTransportDefaults(&http.Transport{TLSClientConfig: config})
 
 	if klog.V(6).Enabled() {
 		provider.HTTPClient.Transport = &client.RoundTripper{
@@ -347,7 +349,6 @@ func NewOpenStackClient(cfg *AuthOpts, userAgent string, extraUserAgent ...strin
 			Logger: &Logger{},
 		}
 	}
-	provider.HTTPClient.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify:true}}
 
 	if cfg.TrustID != "" {
 		opts := cfg.ToAuth3Options()
