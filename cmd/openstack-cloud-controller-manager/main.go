@@ -50,7 +50,7 @@ func main() {
 	fss := cliflag.NamedFlagSets{}
 	command := app.NewCloudControllerManagerCommand(ccmOptions, cloudInitializer, app.DefaultInitFuncConstructors, names.CCMControllerAliases(), fss, wait.NeverStop)
 
-	
+
 	openstack.AddExtraFlags(pflag.CommandLine)
 
 	// TODO: once we switch everything over to Cobra commands, we can go back to calling
