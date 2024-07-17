@@ -43,8 +43,8 @@ type AuthOpts struct {
 	UserID           string                   `gcfg:"user-id" mapstructure:"user-id" name:"os-userID" value:"optional" dependsOn:"os-password"`
 	Username         string                   `name:"os-userName" value:"optional" dependsOn:"os-password"`
 	Password         string                   `name:"os-password" value:"optional" dependsOn:"os-domainID|os-domainName,os-projectID|os-projectName,os-userID|os-userName"`
-	GrantType        string                   `name:"grant-type" value:"optional" dependsOn:"grant-type"`
-	ClientId         string                   `name:"client-id" value:"optional" dependsOn:"client-id"`
+	GrantType        string                   `gcfg:"grant-type" mapstructure:"grant-type" name:"os-grantType" value:"optional"`
+	ClientId         string                   `gcfg:"client-id"  mapstructure:"client-id"  name:"os-clientId" value:"optional"`
 	NetworkEndpoint  string                   `name:"network-endpoint" value:"optional" dependsOn:"network-endpoint"`
 
 	TenantID         string                   `gcfg:"tenant-id" mapstructure:"project-id" name:"os-projectID" value:"optional" dependsOn:"os-password|os-clientCertPath"`

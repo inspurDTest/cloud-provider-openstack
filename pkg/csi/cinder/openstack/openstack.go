@@ -152,6 +152,7 @@ func InitOpenStackProvider(cfgFiles []string, httpEndpoint string) {
 	klog.V(2).Infof("InitOpenStackProvider configFiles: %s", configFiles)
 }
 
+// 王玉东 获取secret入参
 // CreateOpenStackProvider creates Openstack Instance
 func CreateOpenStackProvider() (IOpenStack, error) {
 	// Get config from file
