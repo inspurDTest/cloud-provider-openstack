@@ -371,7 +371,7 @@ func NewOpenStackClient(cfg *AuthOpts, userAgent string, extraUserAgent ...strin
     // 王玉东 换成IAM的入参
 	//opts := cfg.ToAuthOptions()
 	opts := cfg.ToAuthOptionsIAM()
-	klog.V(4).Infof("iam opts value: %+v", opts)
+	klog.V(5).Infof("NewOpenStackClient- iam opts value: %+v", opts)
 	err = openstack.Authenticate(provider, opts)
 
 	return provider, err

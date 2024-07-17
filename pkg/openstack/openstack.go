@@ -263,7 +263,8 @@ func ReadConfig(config io.Reader) (Config, error) {
 	if !util.Contains(supportedContainerStore, cfg.LoadBalancer.ContainerStore) {
 		klog.Warningf("Unsupported Container Store: %s", cfg.LoadBalancer.ContainerStore)
 	}
-
+	klog.V(5).Infof("ReadConfig end -- GrantType: %s", cfg.Global.GrantType)
+	klog.V(5).Infof("ReadConfig end --ClientId: %s", cfg.Global.ClientId)
 	return cfg, err
 }
 
