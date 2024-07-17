@@ -261,8 +261,8 @@ github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLf
 github.com/inspurDTest/cloud-provider v0.29.0-32 h1:w8/fYhb6aLqWbyPOr6jGPco7UOFzlwMF5MkR53qbgbQ=
 github.com/inspurDTest/cloud-provider v0.29.0-32/go.mod h1:60yhZKV21mpYjrgvaWkx72LOSnK1lfZ5xlG+EqSzeF8=
 github.com/inspurDTest/gophercloud v1.6.0-2/go.mod h1:Zgx8ummm1D0CqiPO34zSFL1RRB33SZWzHPgFKvb6IE4=
-github.com/inspurDTest/gophercloud v1.6.0-14 h1:AGm62HHpjvUzXYHRQ99iRNpY7lSaX+/iSsxuYFPYWyQ=
-github.com/inspurDTest/gophercloud v1.6.0-14/go.mod h1:Zgx8ummm1D0CqiPO34zSFL1RRB33SZWzHPgFKvb6IE4=
+github.com/inspurDTest/gophercloud v1.6.0-15 h1:048uLmDn39/3TVCNIGI63Er5PEjCZ+6cPeJ9W5gV1hg=
+github.com/inspurDTest/gophercloud v1.6.0-15/go.mod h1:Zgx8ummm1D0CqiPO34zSFL1RRB33SZWzHPgFKvb6IE4=
 github.com/inspurDTest/utils v1.0.0 h1:iGpm3xhWtXu7yBW4BZmOUuKG5fF4WMuPJcBzDvKKyIY=
 github.com/inspurDTest/utils v1.0.0/go.mod h1:eLlCNpE0vyGDH4yPaI8U5U9qBHRt3fLOhxRixtIuz2o=
 github.com/jonboulle/clockwork v0.2.2 h1:UOGuzwb1PwsrDAObMuhUnj0p5ULPj8V/xJ7Kx9qUBdQ=
