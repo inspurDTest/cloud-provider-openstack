@@ -7,7 +7,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/hashicorp/go-version v1.6.0
 	github.com/inspurDTest/cloud-provider v0.0.0-00010101000000-000000000000
-	github.com/inspurDTest/gophercloud v1.6.0-23
+	github.com/inspurDTest/gophercloud v1.6.0-25
 	github.com/inspurDTest/utils v1.0.0
 	github.com/kubernetes-csi/csi-lib-utils v0.13.0
 	github.com/kubernetes-csi/csi-test/v5 v5.0.0
@@ -152,6 +152,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
