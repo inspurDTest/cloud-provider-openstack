@@ -53,7 +53,7 @@ const (
 
 	// TypeHostName is the name type of openstack instance
 	TypeHostName   = "hostname"
-	defaultTimeOut = 60 * time.Second
+	defaultTimeOut = 1800 * time.Second
 )
 
 // userAgentData is used to add extra information to the gophercloud user-agent
