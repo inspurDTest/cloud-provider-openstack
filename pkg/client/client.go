@@ -44,6 +44,7 @@ type AuthOpts struct {
 	Username         string                   `name:"os-userName" value:"optional" dependsOn:"os-password"`
 	Password         string                   `name:"os-password" value:"optional" dependsOn:"os-domainID|os-domainName,os-projectID|os-projectName,os-userID|os-userName"`
 	GrantType        string                   `gcfg:"grant-type" mapstructure:"grant-type" name:"os-grantType" value:"optional"`
+	OctaviaURL       string                   `gcfg:"octavia-url" mapstructure:"octavia-url" name:"os-octaviaURL" value:"optional"`
 	ClientId         string                   `gcfg:"client-id"  mapstructure:"client-id"  name:"os-clientId" value:"optional"`
 	NetworkEndpoint  string                   `name:"network-endpoint" value:"optional" dependsOn:"network-endpoint"`
 
@@ -84,6 +85,7 @@ func LogCfg(authOpts AuthOpts) {
 	klog.V(5).Infof("UserID: %s", authOpts.UserID)
 	klog.V(5).Infof("Username: %s", authOpts.Username)
 	klog.V(5).Infof("GrantType: %s", authOpts.GrantType)
+	klog.V(5).Infof("OctaviaURL: %s", authOpts.OctaviaURL)
 	klog.V(5).Infof("ClientId: %s", authOpts.ClientId)
 	klog.V(5).Infof("NetworkEndpoint: %s", authOpts.NetworkEndpoint)
 
@@ -187,6 +189,7 @@ func (authOpts AuthOpts) ToAuthOptionsIAM() gophercloud.AuthOptions {
 			Password:                    authOpts.Password,
 			//王玉东添加
 			GrantType:					 authOpts.GrantType,
+			OctaviaURL:                  authOpts.OctaviaURL,
 			ClientId: 					 authOpts.ClientId,
 			NetworkEndpoint:             authOpts.NetworkEndpoint,
 			ProjectID:                   authOpts.TenantID,
@@ -267,6 +270,7 @@ func ReadClouds(authOpts *AuthOpts) error {
 	authOpts.Username = replaceEmpty(authOpts.Username, cloud.AuthInfo.Username)
 	authOpts.Password = replaceEmpty(authOpts.Password, cloud.AuthInfo.Password)
 	authOpts.GrantType = replaceEmpty(authOpts.GrantType, cloud.AuthInfo.GrantType)
+	authOpts.OctaviaURL = replaceEmpty(authOpts.OctaviaURL, cloud.AuthInfo.OctaviaURL)
 	authOpts.ClientId = replaceEmpty(authOpts.ClientId, cloud.AuthInfo.ClientId)
 	authOpts.NetworkEndpoint = replaceEmpty(authOpts.NetworkEndpoint, cloud.AuthInfo.NetworkEndpoint)
 
