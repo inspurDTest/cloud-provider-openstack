@@ -1629,7 +1629,8 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 	// 当service为双栈时，ip类型由loadbalance决定（loadbalance只支持单栈）
 	// TODO 判断新增/修改模式
 	//svcConf.lbID = getStringFromServiceAnnotation(service, ServiceAnnotationLoadBalancerID, "")
-	svcConf.supportLBTags = openstackutil.IsOctaviaFeatureSupported(lbaas.lb, openstackutil.OctaviaFeatureTags, lbaas.opts.LBProvider)
+		//svcConf.supportLBTags = openstackutil.IsOctaviaFeatureSupported(lbaas.lb, openstackutil.OctaviaFeatureTags, lbaas.opts.LBProvider)
+	svcConf.supportLBTags = true
 	if !svcConf.supportLBTags {
 		//return loadbalancer, fmt.Errorf("loadbalance not support tags")
 	}
