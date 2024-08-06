@@ -7,7 +7,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/hashicorp/go-version v1.6.0
 	github.com/inspurDTest/cloud-provider v0.29.0-33
-	github.com/inspurDTest/gophercloud v1.6.0-39
+	github.com/inspurDTest/gophercloud v1.6.0-42
 	github.com/inspurDTest/utils v1.0.0-2
 	github.com/kubernetes-csi/csi-lib-utils v0.13.0
 	github.com/kubernetes-csi/csi-test/v5 v5.0.0
