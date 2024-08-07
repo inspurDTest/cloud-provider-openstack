@@ -1241,6 +1241,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	// TODO get old memeber
 	curMembers := sets.New[string]()
 	poolMembers, err := openstackutil.GetMembersbyPool(lbaas.lb, pool.ID)
+	klog.InfoS("poolID %v, poolMembers %+v", pool.ID, poolMembers)
 	if err != nil {
 		klog.Errorf("failed to get members in the pool %s: %v", pool.ID, err)
 	}
@@ -1253,13 +1254,13 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	if err != nil {
 		return nil, err
 	}
-	klog.V(1).Infof("curMembers is: %v, newMembers is %v", curMembers, newMembers)
+	klog.InfoS("curMembers is: %v, newMembers is %v", curMembers, newMembers)
 	if !curMembers.Equal(newMembers) {
-		klog.V(2).Infof("Updating %d members for pool %s", len(members), pool.ID)
+		klog.InfoS("Updating %d members for pool %s", len(members), pool.ID)
 		if err := openstackutil.BatchUpdatePoolMembers(lbaas.lb, lbID, pool.ID, members); err != nil {
 			return nil, err
 		}
-		klog.V(2).Infof("Successfully updated %d members for pool %s", len(members), pool.ID)
+		klog.InfoS("Successfully updated %d members for pool %s", len(members), pool.ID)
 	}
 
 	return pool, nil
@@ -1931,7 +1932,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		return nil, err
 	}
 
-	klog.V(4).InfoS("Load balancer ensured", "lbID", loadbalancer.ID)
+	klog.InfoS("Load balancer ensured", "lbID", loadbalancer.ID)
 
 	// This is an existing load balancer, either created by occm for other Services or by the user outside of cluster, or
 	// a newly created, unpopulated loadbalancer that needs populating.
@@ -1943,7 +1944,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		key := listenerKey{Protocol: listeners.Protocol(l.Protocol), Port: l.ProtocolPort}
 		curListenerMapping[key] = &curListeners[i]
 	}
-	klog.V(4).InfoS("Existing listeners", "portProtocolMapping", curListenerMapping)
+	klog.InfoS("Existing listeners", "portProtocolMapping", curListenerMapping)
 
 	// Check port conflicts
 	// 校验listener port是否已被openstack||其他service占用
@@ -1952,7 +1953,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 	}
 
 	lbmembers := lbaas.getMemeberOptions(svcConf, endpointSlices)
-	klog.V(1).Infof("lbmembers is %v", lbmembers)
+	klog.InfoS("lb Memeber FromEps is %+v", lbmembers)
 
 	// 生成listener+pool+memeber
 	for portIndex, port := range service.Spec.Ports {
