@@ -845,25 +845,24 @@ func disassociateSecurityGroupForLB(network *gophercloud.ServiceClient, sg strin
 // deleteListeners deletes listeners and its default pool.
 func (lbaas *LbaasV2) deleteListeners(lbID string, listenerList []listeners.Listener) error {
 	for _, listener := range listenerList {
-		klog.InfoS("Deleting listener", "listenerID", listener.ID, "lbID", lbID)
+		klog.Infof("Deleting listener, listenerID is %s, listenerID is %s", listener.ID, lbID)
 
 		pool, err := openstackutil.GetPoolByListener(lbaas.lb, lbID, listener.ID)
 		if err != nil && err != cpoerrors.ErrNotFound {
 			return fmt.Errorf("error getting pool for obsolete listener %s: %v", listener.ID, err)
 		}
 		if pool != nil {
-			klog.InfoS("Deleting pool", "poolID", pool.ID, "listenerID", listener.ID, "lbID", lbID)
+			klog.Infof("Deleting pool,poolID is %s,listenerID is %s,lbID is %s",pool.ID, listener.ID,  lbID)
 			// Delete pool automatically deletes all its members.
 			if err := openstackutil.DeletePool(lbaas.lb, pool.ID, lbID); err != nil {
 				return err
 			}
-			klog.InfoS("Deleted pool", "poolID", pool.ID, "listenerID", listener.ID, "lbID", lbID)
 		}
 
 		if err := openstackutil.DeleteListener(lbaas.lb, listener.ID, lbID); err != nil {
 			return err
 		}
-		klog.InfoS("Deleted listener", "listenerID", listener.ID, "lbID", lbID)
+		klog.Infof("Deleted listener,listenerID is %s,lbID is %s",listener.ID, lbID)
 	}
 
 	return nil
@@ -874,30 +873,31 @@ func (lbaas *LbaasV2) deleteOctaviaListeners(lbID string, listenerList []listene
 	for _, listener := range listenerList {
 		// If the listener was created by this Service before or after supporting shared LB.
 		if (isLBOwner && len(listener.Tags) == 0) || cpoutil.Contains(listener.Tags, lbName) {
-			klog.InfoS("Deleting listener", "listenerID", listener.ID, "lbID", lbID)
+			klog.Infof("Deleting listener,listenerID is %s,lbID is %s", listener.ID,  lbID)
 
 			pool, err := openstackutil.GetPoolByListener(lbaas.lb, lbID, listener.ID)
 			if err != nil && err != cpoerrors.ErrNotFound {
 				return fmt.Errorf("error getting pool for listener %s: %v", listener.ID, err)
 			}
 			if pool != nil {
-				klog.InfoS("Deleting pool", "poolID", pool.ID, "listenerID", listener.ID, "lbID", lbID)
+				klog.Infof("Deleting pool,poolID is %s,listenerID is %s,lbID is %s", pool.ID, listener.ID, lbID)
 
 				// Delete pool automatically deletes all its members.
 				if err := openstackutil.DeletePool(lbaas.lb, pool.ID, lbID); err != nil {
 					return err
 				}
-				klog.InfoS("Deleted pool", "poolID", pool.ID, "listenerID", listener.ID, "lbID", lbID)
+				klog.Infof("Deleted pool,poolID is %s,listenerID is %s,lbID is %s", pool.ID, listener.ID, lbID)
+
 			}
 
 			if err := openstackutil.DeleteListener(lbaas.lb, listener.ID, lbID); err != nil {
 				return err
 			}
 
-			klog.InfoS("Deleted listener", "listenerID", listener.ID, "lbID", lbID)
+			klog.Infof("Deleted listener,listenerID is %s,lbID is %s", listener.ID, lbID)
 		} else {
 			// This listener is created and managed by others, shouldn't delete.
-			klog.V(4).InfoS("Ignoring the listener used by others", "listenerID", listener.ID, "loadbalancerID", lbID, "tags", listener.Tags)
+			klog.Infof("Ignoring the listener used by others，listenerID is %s, loadbalancerID is %s,tags is %s", listener.ID, lbID, listener.Tags)
 			continue
 		}
 	}
@@ -1113,7 +1113,7 @@ func (lbaas *LbaasV2) ensureOctaviaHealthMonitor(lbID string, name string, pool 
 	// recreate health monitor with a new type
 	createOpts := lbaas.buildMonitorCreateOpts(svcConf, port, name)
 	if createOpts.Type != monitor.Type {
-		klog.InfoS("Recreating health monitor for the pool", "pool", pool.ID, "oldMonitor", monitorID)
+		klog.Infof("Recreating health monitor for the pool, poolID is %s,monitorID is %s",  pool.ID, monitorID)
 		if err := openstackutil.DeleteHealthMonitor(lbaas.lb, monitorID, lbID); err != nil {
 			return err
 		}
@@ -1206,7 +1206,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 
 	// Delete the pool and its members if it already exists and has the wrong protocol
 	if pool != nil && v2pools.Protocol(pool.Protocol) != poolProto {
-		klog.InfoS("Deleting unused pool", "poolID", pool.ID, "listenerID", listener.ID, "lbID", lbID)
+		klog.Infof("Deleting unused pool, poolID is %s, listenerID is %s, lbID is %s",  pool.ID, listener.ID, lbID)
 
 		// Delete pool automatically deletes all its members.
 		if err := openstackutil.DeletePool(lbaas.lb, pool.ID, lbID); err != nil {
@@ -1220,12 +1220,13 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 		createOpt := lbaas.buildPoolCreateOpt(listener.Protocol, service, svcConf, name)
 		createOpt.ListenerID = listener.ID
 		createOpt.Tags = []string{name}
-		klog.InfoS("Creating pool", "listenerID", listener.ID, "protocol", createOpt.Protocol)
+		klog.Infof("Creating pool, listenerID is %s, protocol is %s",  listener.ID, createOpt.Protocol)
+
 		pool, err = openstackutil.CreatePool(lbaas.lb, createOpt, lbID)
 		if err != nil {
 			return nil, err
 		}
-		klog.V(2).Infof("Pool %s created for listener %s", pool.ID, listener.ID)
+		klog.Infof("Pool %s created for listener %s", pool.ID, listener.ID)
 	}
 
 	if lbaas.opts.ProviderRequiresSerialAPICalls {
@@ -1241,7 +1242,8 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	// TODO get old memeber
 	curMembers := sets.New[string]()
 	poolMembers, err := openstackutil.GetMembersbyPool(lbaas.lb, pool.ID)
-	klog.InfoS("poolID %v, poolMembers %+v", pool.ID, poolMembers)
+	klog.Infof("poolID  is %s, poolMembers is %s",  pool.ID, poolMembers)
+
 	if err != nil {
 		klog.Errorf("failed to get members in the pool %s: %v", pool.ID, err)
 	}
@@ -1254,13 +1256,13 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	if err != nil {
 		return nil, err
 	}
-	klog.InfoS("curMembers is: %+v, newMembers is %+v", curMembers, newMembers)
+	klog.Infof("curMembers  is %+v, newMembers is %+v",  curMembers, newMembers)
 	if !curMembers.Equal(newMembers) {
-		klog.InfoS("Updating %d members for pool %s", len(members), pool.ID)
+		klog.Infof("Updating %d members for pool %s", len(members), pool.ID)
 		if err := openstackutil.BatchUpdatePoolMembers(lbaas.lb, lbID, pool.ID, members); err != nil {
 			return nil, err
 		}
-		klog.InfoS("Successfully updated %d members for pool %s", len(members), pool.ID)
+		klog.Infof("Successfully updated len(members) %s,members for pool %s", len(members), pool.ID)
 	}
 
 	return pool, nil
@@ -1401,11 +1403,12 @@ func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListene
 		}
 
 		if listenerChanged {
-			klog.InfoS("Updating listener", "listenerID", listener.ID, "lbID", lbID, "updateOpts", updateOpts)
+			klog.Infof("Updating listener,listenerID is  %s,lbID is  %s,updateOpts is  %+v", listener.ID, lbID, updateOpts)
 			if err := openstackutil.UpdateListener(lbaas.lb, lbID, listener.ID, updateOpts); err != nil {
 				return nil, fmt.Errorf("failed to update listener %s of loadbalancer %s: %v", listener.ID, lbID, err)
 			}
-			klog.InfoS("Updated listener", "listenerID", listener.ID, "lbID", lbID)
+			klog.Infof("Updated listener,listenerID is  %s,lbID is  %s", listener.ID, lbID)
+
 		}
 	}
 
@@ -1797,7 +1800,7 @@ func (lbaas *LbaasV2) checkListenerPorts(service *corev1.Service, curListenerMap
 func (lbaas *LbaasV2) getMemeberOptions(svcConf *serviceConfig, endpointSlices []*discoveryv1.EndpointSlice) map[int][]v2pools.BatchUpdateMemberOpts {
 	// 存储targetPort:[targetPort,Name,SubnetID,Address]
 	// 更新memeber前通过 servicePort:[targetPort]与targetPort:[targetPort,Name,SubnetID,Address]关联，获取并组装member信息
-	klog.InfoS("getMemeberOptions, svcConf", svcConf, "endpointSlices",  endpointSlices)
+	klog.Infof("getMemeberOptions, svcConf is %+v,endpointSlices is  %+v", svcConf, endpointSlices)
 	members := make(map[int][]v2pools.BatchUpdateMemberOpts)
 	if len(svcConf.lbMemberSubnetID) == 0 {
 		//return members
@@ -1814,12 +1817,14 @@ func (lbaas *LbaasV2) getMemeberOptions(svcConf *serviceConfig, endpointSlices [
 func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *discoveryv1.EndpointSlice, members map[int][]v2pools.BatchUpdateMemberOpts) {
 
 	for _, port := range eps.Ports {
-		klog.InfoS("port %+v", port)
+		klog.Infof("port %+v", port)
+
 		for _, endpoint := range eps.Endpoints {
 			// Skip if not ready and the user does not want to publish not-ready addresses. Note: we're treating nil as ready
 			// to be on the safe side as the EndpointConditions doc states "In most cases consumers should interpret this
 			// unknown state (ie nil) as ready".
-			klog.InfoS("endpoint %+v", endpoint)
+			klog.Infof("endpoint %+v", endpoint)
+
 			if endpoint.Conditions.Ready == nil || !*endpoint.Conditions.Ready {
 				continue
 			}
@@ -1828,11 +1833,12 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 			}
 
 			for addressIndex, address := range endpoint.Addresses {
-				klog.InfoS("addressIndex: %+v,address: %+v", addressIndex, address)
+				klog.Infof("addressIndex: %+v,address: %+v", addressIndex, address)
+
 				// endpointSliceName + Protocol + port + addressIndex
 				// // namespace_endpointSliceName_protocol_port_addressIndex
 				memberName := cpoutil.Sprintf255(memeberFormat, eps.Namespace, eps.Name, *port.Protocol, *port.Port, addressIndex)
-				klog.InfoS("memberName: %+v", memberName)
+				klog.Infof("memberName: %+v", memberName)
 				member := v2pools.BatchUpdateMemberOpts{
 					Address:      address,
 					ProtocolPort: int(*port.Port),
@@ -1849,7 +1855,7 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 				members[int(*port.Port)] = batchUpdateMemberOpts
 				//memberMap := map[int]v2pools.BatchUpdateMemberOpts{int(*port.Port):member}
 				//members = append(members, &memberMap)
-				klog.InfoS("members is %v", members)
+				klog.Infof("members is %+v", members)
 			}
 
 		}
@@ -1936,7 +1942,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		return nil, err
 	}
 
-	klog.InfoS("Load balancer ensured", "lbID", loadbalancer.ID)
+	klog.Infof("Load balancer ensured lbID is %s", loadbalancer.ID)
 
 	// This is an existing load balancer, either created by occm for other Services or by the user outside of cluster, or
 	// a newly created, unpopulated loadbalancer that needs populating.
@@ -1948,7 +1954,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		key := listenerKey{Protocol: listeners.Protocol(l.Protocol), Port: l.ProtocolPort}
 		curListenerMapping[key] = &curListeners[i]
 	}
-	klog.InfoS("Existing listeners", "portProtocolMapping", curListenerMapping)
+	klog.Infof("Existing listeners, portProtocolMapping is %+v", curListenerMapping)
 
 	// Check port conflicts
 	// 校验listener port是否已被openstack||其他service占用
@@ -1957,7 +1963,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 	}
 
 	lbmembers := lbaas.getMemeberOptions(svcConf, endpointSlices)
-	klog.InfoS("lb Memeber FromEps is %+v", lbmembers)
+	klog.Infof("lb Memeber FromEps is %+v", lbmembers)
 
 	// 生成listener+pool+memeber
 	for portIndex, port := range service.Spec.Ports {
@@ -2034,7 +2040,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 // EnsureLoadBalancer creates a new load balancer or updates the existing one.
 func (lbaas *LbaasV2) EnsureLoadBalancer(ctx context.Context, clusterName string, apiService *corev1.Service, nodes []*corev1.Node, endpointSlices []*discoveryv1.EndpointSlice, lbId string) (*corev1.LoadBalancerStatus, error) {
 	mc := metrics.NewMetricContext("loadbalancer", "ensure")
-	klog.InfoS("EnsureLoadBalancer", "cluster", clusterName, "service", klog.KObj(apiService))
+	klog.Infof("EnsureLoadBalancer, clusterName is  %s, service  is  %+v", clusterName,klog.KObj(apiService))
 
 	status, err := lbaas.ensureOctaviaLoadBalancer(ctx, clusterName, apiService, nodes, endpointSlices, lbId)
 
@@ -2356,13 +2362,13 @@ func (lbaas *LbaasV2) deleteFIPIfCreatedByProvider(fip *floatingips.FloatingIP, 
 		// It's not a FIP created by us, don't touch it.
 		return false, nil
 	}
-	klog.InfoS("Deleting floating IP for service", "floatingIP", fip.FloatingIP, "service", klog.KObj(service))
+	klog.Infof("Deleting floating IP for service, floatingIP is %s, service is %+v", fip.FloatingIP, klog.KObj(service))
 	mc := metrics.NewMetricContext("floating_ip", "delete")
 	err = floatingips.Delete(lbaas.network, fip.ID).ExtractErr()
 	if mc.ObserveRequest(err) != nil {
 		return false, fmt.Errorf("failed to delete floating IP %s for loadbalancer VIP port %s: %v", fip.FloatingIP, portID, err)
 	}
-	klog.InfoS("Deleted floating IP for service", "floatingIP", fip.FloatingIP, "service", klog.KObj(service))
+	klog.Infof("Deleting floating IP for service, floatingIP is %s, service is %+v", fip.FloatingIP, klog.KObj(service))
 	return true, nil
 }
 
@@ -2458,6 +2464,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 	// delete monitors
 	for _, monitorID := range monitorIDs {
 		klog.InfoS("Deleting health monitor", "monitorID", monitorID, "lbID", loadbalancer.ID)
+
 		if err := openstackutil.DeleteHealthMonitor(lbaas.lb, monitorID, loadbalancer.ID); err != nil {
 			return err
 		}
