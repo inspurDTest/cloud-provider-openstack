@@ -1254,7 +1254,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	if err != nil {
 		return nil, err
 	}
-	klog.InfoS("curMembers is: %v, newMembers is %v", curMembers, newMembers)
+	klog.InfoS("curMembers is: %+v, newMembers is %+v", curMembers, newMembers)
 	if !curMembers.Equal(newMembers) {
 		klog.InfoS("Updating %d members for pool %s", len(members), pool.ID)
 		if err := openstackutil.BatchUpdatePoolMembers(lbaas.lb, lbID, pool.ID, members); err != nil {
@@ -1797,6 +1797,7 @@ func (lbaas *LbaasV2) checkListenerPorts(service *corev1.Service, curListenerMap
 func (lbaas *LbaasV2) getMemeberOptions(svcConf *serviceConfig, endpointSlices []*discoveryv1.EndpointSlice) map[int][]v2pools.BatchUpdateMemberOpts {
 	// 存储targetPort:[targetPort,Name,SubnetID,Address]
 	// 更新memeber前通过 servicePort:[targetPort]与targetPort:[targetPort,Name,SubnetID,Address]关联，获取并组装member信息
+	klog.InfoS("getMemeberOptions, svcConf %+v,endpointSlices %+v", svcConf, endpointSlices)
 	members := make(map[int][]v2pools.BatchUpdateMemberOpts)
 	if len(svcConf.lbMemberSubnetID) == 0 {
 		return members
@@ -1813,12 +1814,13 @@ func (lbaas *LbaasV2) getMemeberOptions(svcConf *serviceConfig, endpointSlices [
 func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *discoveryv1.EndpointSlice, members map[int][]v2pools.BatchUpdateMemberOpts) {
 
 	for _, port := range eps.Ports {
-
+		klog.InfoS("port %+v", port)
 		for _, endpoint := range eps.Endpoints {
 			// Skip if not ready and the user does not want to publish not-ready addresses. Note: we're treating nil as ready
 			// to be on the safe side as the EndpointConditions doc states "In most cases consumers should interpret this
 			// unknown state (ie nil) as ready".
-			if endpoint.Conditions.Ready == nil || (endpoint.Conditions.Ready != nil && !*endpoint.Conditions.Ready) {
+			klog.InfoS("endpoint %+v", endpoint)
+			if endpoint.Conditions.Ready == nil || !*endpoint.Conditions.Ready {
 				continue
 			}
 			if len(endpoint.Addresses) == 0 {
@@ -1826,9 +1828,11 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 			}
 
 			for addressIndex, address := range endpoint.Addresses {
+				klog.InfoS("addressIndex: %+v,address: %+v", addressIndex, address)
 				// endpointSliceName + Protocol + port + addressIndex
 				// // namespace_endpointSliceName_protocol_port_addressIndex
 				memberName := cpoutil.Sprintf255(memeberFormat, eps.Namespace, eps.Name, *port.Protocol, *port.Port, addressIndex)
+				klog.InfoS("memberName: %+v", memberName)
 				member := v2pools.BatchUpdateMemberOpts{
 					Address:      address,
 					ProtocolPort: int(*port.Port),
@@ -1845,7 +1849,7 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 				members[int(*port.Port)] = batchUpdateMemberOpts
 				//memberMap := map[int]v2pools.BatchUpdateMemberOpts{int(*port.Port):member}
 				//members = append(members, &memberMap)
-				klog.V(1).Infof("members is %v", members)
+				klog.InfoS("members is %v", members)
 			}
 
 		}
