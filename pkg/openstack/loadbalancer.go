@@ -653,7 +653,7 @@ func nodeAddressForLB(node *corev1.Node, preferredIPFamily corev1.IPFamily) (str
 
 // getNamespaceFromServiceAnnotation searches a given v1.namespace for a specific annotationKey and either returns the annotation's value or a specified defaultSetting
 func getNamespaceFromServiceAnnotation(namespace *corev1.Namespace, annotationKey string, defaultSetting string) string {
-	klog.V(4).Infof("getNamespaceFromServiceAnnotation(%s, %v, %v)", namespace.Name, annotationKey, defaultSetting)
+	klog.V(4).Infof("getNamespaceFromServiceAnnotation(%v, %v, %v)", namespace, annotationKey, defaultSetting)
 	if annotationValue, ok := namespace.Annotations[annotationKey]; ok {
 		//if there is an annotation for this setting, set the "setting" var to it
 		// annotationValue can be empty, it is working as designed
@@ -1797,10 +1797,10 @@ func (lbaas *LbaasV2) checkListenerPorts(service *corev1.Service, curListenerMap
 func (lbaas *LbaasV2) getMemeberOptions(svcConf *serviceConfig, endpointSlices []*discoveryv1.EndpointSlice) map[int][]v2pools.BatchUpdateMemberOpts {
 	// 存储targetPort:[targetPort,Name,SubnetID,Address]
 	// 更新memeber前通过 servicePort:[targetPort]与targetPort:[targetPort,Name,SubnetID,Address]关联，获取并组装member信息
-	klog.InfoS("getMemeberOptions, svcConf %+v,endpointSlices %+v", svcConf, endpointSlices)
+	klog.InfoS("getMemeberOptions, svcConf", svcConf, "endpointSlices",  endpointSlices)
 	members := make(map[int][]v2pools.BatchUpdateMemberOpts)
 	if len(svcConf.lbMemberSubnetID) == 0 {
-		return members
+		//return members
 	}
 	for _, eps := range endpointSlices {
 		// Skip if not lb expect preferredIPFamily
