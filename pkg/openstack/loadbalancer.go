@@ -1242,7 +1242,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	// TODO get old memeber
 	curMembers := sets.New[string]()
 	poolMembers, err := openstackutil.GetMembersbyPool(lbaas.lb, pool.ID)
-	klog.Infof("poolID  is %s, poolMembers is %s",  pool.ID, poolMembers)
+	klog.Infof("poolID  is %s, poolMembers is %+v",  pool.ID, poolMembers)
 
 	if err != nil {
 		klog.Errorf("failed to get members in the pool %s: %v", pool.ID, err)
@@ -1817,7 +1817,7 @@ func (lbaas *LbaasV2) getMemeberOptions(svcConf *serviceConfig, endpointSlices [
 func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *discoveryv1.EndpointSlice, members map[int][]v2pools.BatchUpdateMemberOpts) {
 
 	for _, port := range eps.Ports {
-		klog.Infof("port %+v", port)
+		klog.Infof("port %s", port.String())
 
 		for _, endpoint := range eps.Endpoints {
 			// Skip if not ready and the user does not want to publish not-ready addresses. Note: we're treating nil as ready
