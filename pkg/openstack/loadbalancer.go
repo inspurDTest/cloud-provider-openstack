@@ -21,6 +21,9 @@ import (
 	"encoding/json"
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apiserver/pkg/apis/example/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/kubernetes/pkg/apis/discovery"
 	"net"
 	"reflect"
 	"regexp"
@@ -606,7 +609,7 @@ func (lbaas *LbaasV2) GetLoadBalancer(ctx context.Context, clusterName string, s
 
 // GetLoadBalancerName returns the constructed load balancer name.
 func (lbaas *LbaasV2) GetLoadBalancerName(_ context.Context, lbName string, service *corev1.Service) string {
-	return cpoutil.Sprintf255(lbFormat, servicePrefix, serviceClusterId ,service.Namespace, service.Name)
+	return cpoutil.Sprintf255(lbFormat, servicePrefix, lbName ,service.Namespace, service.Name)
 }
 
 // getLoadBalancerLegacyName returns the legacy load balancer name for backward compatibility.
@@ -1716,6 +1719,12 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 		return loadbalancer, fmt.Errorf("checkService: get namespace:%s err:%v", service.Namespace, err.Error())
 	}
 
+	//namespace, err := lbaas.kclient.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), service.Namespace, metav1.GetOptions{})
+	if err != nil {
+		return loadbalancer, fmt.Errorf("checkService: get namespace:%s err:%v", service.Namespace, err.Error())
+	}
+
+
 	// 王玉东改成默认从configmap获取默认的memberSubnetID,以及lbaas.opts.MemberSubnetID
 	svcConf.lbMemberSubnetID, err = lbaas.getMemberSubnetIDByNS(namespace, svcConf)
 	if err != nil {
@@ -1797,7 +1806,7 @@ func (lbaas *LbaasV2) checkListenerPorts(service *corev1.Service, curListenerMap
 
 	return nil
 }
-func (lbaas *LbaasV2) getMemeberOptions(svcConf *serviceConfig, endpointSlices []*discoveryv1.EndpointSlice) map[int][]v2pools.BatchUpdateMemberOpts {
+func (lbaas *LbaasV2) getMemeberOptions(clusterId,namspace string, svcConf *serviceConfig, endpointSlices []*discoveryv1.EndpointSlice) map[int][]v2pools.BatchUpdateMemberOpts {
 	// 存储targetPort:[targetPort,Name,SubnetID,Address]
 	// 更新memeber前通过 servicePort:[targetPort]与targetPort:[targetPort,Name,SubnetID,Address]关联，获取并组装member信息
 	klog.Infof("getMemeberOptions, svcConf is %+v,endpointSlices is  %+v", svcConf, endpointSlices)
@@ -1805,16 +1814,42 @@ func (lbaas *LbaasV2) getMemeberOptions(svcConf *serviceConfig, endpointSlices [
 	if len(svcConf.lbMemberSubnetID) == 0 {
 		//return members
 	}
+
+	// 获取ip与pod的关系
+	pods, err := lbaas.kclient.CoreV1().Pods(namspace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		klog.Errorf("getMemeberOptions  get  pods,namespace %s, err: %+v", namspace, err.Error())
+		return nil
+	}
+	podsInfo := make(map[string]string)
+	for _,pod := range pods.Items {
+		podIPs := pod.Status.PodIPs
+		for _,podIP:= range podIPs{
+			// 只处理ipv4类型的pod
+			ipAddr := net.ParseIP(podIP.IP)
+			if ipAddr == nil {
+				continue
+			}
+			if ipAddr.To4() == nil {
+				continue
+			}
+			podInfoStr := clusterId + "_" + pod.Namespace + "_" +  pod.Name
+			podsInfo[podIP.IP] = podInfoStr
+		}
+	}
+
 	for _, eps := range endpointSlices {
 		// Skip if not lb expect preferredIPFamily
-		if string(eps.AddressType) != string(svcConf.preferredIPFamily) {
+		// and 非ipv4类型的port
+		if (string(eps.AddressType) != string(svcConf.preferredIPFamily) ) && (string(eps.AddressType)) != "IPv4"{
+			klog.Infof("AddressType err,string(eps.AddressType):%s, string(svcConf.preferredIPFamily)", string(eps.AddressType), string(svcConf.preferredIPFamily))
 			continue
 		}
-		lbaas.getMemeberOptionsFromEps(svcConf, eps, members)
+		lbaas.getMemeberOptionsFromEps(podsInfo, svcConf, eps, members)
 	}
 	return members
 }
-func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *discoveryv1.EndpointSlice, members map[int][]v2pools.BatchUpdateMemberOpts) {
+func (lbaas *LbaasV2) getMemeberOptionsFromEps(podsInfo map[string]string, svcConf *serviceConfig, eps *discoveryv1.EndpointSlice, members map[int][]v2pools.BatchUpdateMemberOpts) {
 
 	for _, port := range eps.Ports {
 		klog.Infof("port %s", port.String())
@@ -1826,9 +1861,11 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 			klog.Infof("endpoint %+v", endpoint)
 
 			if endpoint.Conditions.Ready == nil || !*endpoint.Conditions.Ready {
+				klog.Infof("endpoint.Conditions.Ready: %v", endpoint.Conditions.Ready)
 				continue
 			}
 			if len(endpoint.Addresses) == 0 {
+				klog.Infof("len(endpoint.Addresses): %v", len(endpoint.Addresses))
 				continue
 			}
 
@@ -1839,10 +1876,17 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(svcConf *serviceConfig, eps *disc
 				// // namespace_endpointSliceName_protocol_port_addressIndex
 				memberName := cpoutil.Sprintf255(memeberFormat, eps.Namespace, eps.Name, *port.Protocol, *port.Port, addressIndex)
 				klog.Infof("memberName: %+v", memberName)
+
+				podinfo := podsInfo[address]
+				if len(podinfo) == 0 {
+					klog.Errorf("cannot get pod by ip: %v", address)
+				}
+
 				member := v2pools.BatchUpdateMemberOpts{
 					Address:      address,
 					ProtocolPort: int(*port.Port),
 					Name:         &memberName,
+					ComputeId:    &podinfo,
 					SubnetID:     &svcConf.lbMemberSubnetID,
 					// TODO 进一步确认是否需要
 					Tags:         []string{memberName},
@@ -1929,11 +1973,14 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		return nil, nil
 	}
 
+	cm, err := lbaas.kclient.CoreV1().ConfigMaps("kube-system").Get(context.TODO(),"icks-cluster-info", metav1.GetOptions{})
+	clusterId := cm.Data["clusterId"]
+
 	svcConf.lbID = lbID
 
 	// Use more meaningful name for the load balancer but still need to check the legacy name for backward compatibility.
 	// lbName:k8s_svcNs_svcName
-	lbName := lbaas.GetLoadBalancerName(ctx, loadbalancer.Name, service)
+	lbName := lbaas.GetLoadBalancerName(ctx, clusterId, service)
 	svcConf.lbName = lbName
 	//serviceName := fmt.Sprintf("%s/%s", service.Namespace, service.Name)
 
@@ -1962,7 +2009,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		return nil, err
 	}
 
-	lbmembers := lbaas.getMemeberOptions(svcConf, endpointSlices)
+	lbmembers := lbaas.getMemeberOptions(clusterId, service.Namespace, svcConf, endpointSlices)
 	klog.Infof("lb Memeber FromEps is %+v", lbmembers)
 
 	// 生成listener+pool+memeber
