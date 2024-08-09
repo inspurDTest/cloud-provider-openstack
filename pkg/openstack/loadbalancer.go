@@ -1883,10 +1883,10 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(podsInfo map[string]string, svcCo
 					Address:      address,
 					ProtocolPort: int(*port.Port),
 					Name:         &memberName,
-					ComputeId:    &podinfo,
+					//ComputeId:    &podinfo,
 					SubnetID:     &svcConf.lbMemberSubnetID,
 					// TODO 进一步确认是否需要
-					Tags: []string{memberName},
+					Tags: []string{memberName,podinfo},
 				}
 				batchUpdateMemberOpts := members[int(*port.Port)]
 				if len(batchUpdateMemberOpts) == 0 {
