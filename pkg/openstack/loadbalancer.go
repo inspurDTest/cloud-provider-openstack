@@ -112,9 +112,9 @@ const (
 	//k8s_svcNs_svcName 是否需要加上vip
 	lbFormat = "%s_%s_%s_%s"
 	//listenerFormat = "listener_%d_%s"
-	//lbName_portIndex => k8s_svcNs_svcName_portIndex
+	//lbName_portIndex => k8s_runtimeId_svcNs_svcName_portIndex
 	listenerFormat = "%s_%d"
-	//lbName_portIndex => k8s_svcNs_svcName_portIndex
+	//lbName_portIndex => k8s_runtimeId_svcNs_svcName_portIndex
 	poolFormat    = "%s_%d"
 	monitorFormat = "monitor_%d_%s"
 	// namespace_endpointSliceName_protocol_port_addressIndex
@@ -1971,8 +1971,13 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 	}
 
 	cm, err := lbaas.kclient.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "icks-cluster-info", metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
 	clusterId := cm.Data["clusterId"]
-
+	if len(clusterId) == 0 {
+		return nil, fmt.Errorf("icks-cluster-info's configmap could not contain clusterId")
+	}
 	svcConf.lbID = lbID
 
 	// Use more meaningful name for the load balancer but still need to check the legacy name for backward compatibility.
@@ -2429,10 +2434,20 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		klog.V(1).Infof("service not bond to lb")
 		return nil
 	}
-	lbName := lbaas.GetLoadBalancerName(ctx, clusterName, service)
+
+	cm, err := lbaas.kclient.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "icks-cluster-info", metav1.GetOptions{})
+	if err != nil {
+		return  err
+	}
+	clusterId := cm.Data["clusterId"]
+	if len(clusterId) == 0 {
+		return fmt.Errorf("icks-cluster-info's configmap could not contain clusterId")
+	}
+
+	lbName := lbaas.GetLoadBalancerName(ctx, clusterId, service)
 	// loadbalance由CMP创建，serivce和lb只能通过serivce的注解关联上
 	//legacyName := lbaas.getLoadBalancerLegacyName(ctx, clusterName, service)
-	var err error
+	//var err error
 	var loadbalancer *loadbalancers.LoadBalancer
 	// TODO LB默认为share,且provider-openstack不处理LB
 
@@ -2487,8 +2502,8 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 			Port:     int(port.Port),
 		}]
 		// 这一部分不需要改，通过listener的tags以及key确认listener的归属
-		// klog.V(1).Infof("listener.Tags:  %v, lbName: %v", listener.Tags, lbName)
-		if isPresent && strings.Contains(listener.Name, lbName+"_") {
+		klog.InfoS("listener.Name: %s, lbName: %s", listener.Name, lbName)
+		if isPresent && strings.Contains(listener.Name, lbName) {
 			listenersToDelete = append(listenersToDelete, *listener)
 		}
 	}
@@ -2502,7 +2517,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		if err != nil && err != cpoerrors.ErrNotFound {
 			return fmt.Errorf("error getting pool for listener %s: %v", listener.ID, err)
 		}
-
+		klog.V(1).Infof("poolToDelete: %+v", pool)
 		if pool != nil {
 			if pool.MonitorID != "" {
 				monitorIDs = append(monitorIDs, pool.MonitorID)
@@ -2522,21 +2537,23 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 
 	// delete listeners
 	if err := lbaas.deleteListeners(loadbalancer.ID, listenerList); err != nil {
+		klog.Errorf("Failed to deleteListeners: %v", err.Error())
 		return err
 	}
 
-	// 暂不需要处理
+	// 王玉东 暂不需要处理 --安全组
 	// Delete the Security Group. We're doing that even if `manage-security-groups` is disabled to make sure we don't
 	// orphan created SGs even if CPO got reconfigured.
-	if err := lbaas.EnsureSecurityGroupDeleted(clusterName, service); err != nil {
+	/*if err := lbaas.EnsureSecurityGroupDeleted(clusterName, service); err != nil {
 		return err
-	}
+	}*/
 
 	return nil
 }
 
 // EnsureSecurityGroupDeleted deleting security group for specific loadbalancer service.
 func (lbaas *LbaasV2) EnsureSecurityGroupDeleted(_ string, service *corev1.Service) error {
+
 	// Generate Name
 	lbSecGroupName := getSecurityGroupName(service)
 	lbSecGroupID, err := secgroups.IDFromName(lbaas.network, lbSecGroupName)

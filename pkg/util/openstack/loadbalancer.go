@@ -496,9 +496,9 @@ func GetPoolByListener(client *gophercloud.ServiceClient, lbID, listenerID strin
 				}
 			}
 		}
-		// TODO 为啥最多一个pool?
+		// TODO 为啥最多一个pool? 不知道原因所以放开此限制
 		if len(listenerPools) > 1 {
-			return false, cpoerrors.ErrMultipleResults
+			// return false, cpoerrors.ErrMultipleResults
 		}
 		return true, nil
 	})
