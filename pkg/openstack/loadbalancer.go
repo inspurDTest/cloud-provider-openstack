@@ -2065,7 +2065,10 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 	status.Ingress = []corev1.LoadBalancerIngress{{IP: loadbalancer.VipAddress}}
 	//status := lbaas.createLoadBalancerStatus(service, svcConf, addr)
 
-	if lbaas.opts.ManageSecurityGroups {
+	// 王玉东 临时不管新SecurityGroups
+	return status, nil
+
+	/*if lbaas.opts.ManageSecurityGroups {
 		err := lbaas.ensureAndUpdateOctaviaSecurityGroup(clusterName, service, nodes, svcConf)
 		if err != nil {
 			return status, fmt.Errorf("failed when reconciling security groups for LB service %v/%v: %v", service.Namespace, service.Name, err)
@@ -2078,7 +2081,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		}
 	}
 
-	return status, nil
+	return status, nil*/
 }
 
 // EnsureLoadBalancer creates a new load balancer or updates the existing one.
@@ -2194,8 +2197,10 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 			return err
 		}
 	}
+    // 王玉东 临时不关心ManageSecurityGroups
+	 return nil
 
-	if lbaas.opts.ManageSecurityGroups {
+	/*if lbaas.opts.ManageSecurityGroups {
 		err := lbaas.ensureAndUpdateOctaviaSecurityGroup(clusterName, service, nodes, svcConf)
 		if err != nil {
 			return fmt.Errorf("failed to update Security Group for loadbalancer service %s: %v", serviceName, err)
@@ -2205,7 +2210,7 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 	// only called on changes to the list of the Nodes. Deletion of the SG on reconfiguration will be handled by
 	// EnsureLoadBalancer() that is the true LB reconcile function.
 
-	return nil
+	return nil*/
 }
 
 // UpdateLoadBalancer updates hosts under the specified load balancer.
