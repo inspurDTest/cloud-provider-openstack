@@ -1830,7 +1830,7 @@ func (lbaas *LbaasV2) getMemeberOptions(clusterId, namspace string, svcConf *ser
 			if ipAddr.To4() == nil {
 				continue
 			}
-			podInfoStr := clusterId + "_" + pod.Namespace + "_" + pod.Name
+			podInfoStr := "k8s" + "_" + clusterId + "_" + pod.Namespace + "_" + pod.Name
 			podsInfo[podIP.IP] = podInfoStr
 		}
 	}
@@ -1886,7 +1886,7 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(podsInfo map[string]string, svcCo
 					//ComputeId:    &podinfo,
 					SubnetID:     &svcConf.lbMemberSubnetID,
 					// TODO 进一步确认是否需要
-					Tags: []string{memberName,podinfo},
+					Tags: []string{podinfo},
 				}
 				batchUpdateMemberOpts := members[int(*port.Port)]
 				if len(batchUpdateMemberOpts) == 0 {
@@ -2144,6 +2144,16 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 		return err
 	}
 
+	cm, err := lbaas.kclient.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "icks-cluster-info", metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	clusterId := cm.Data["clusterId"]
+	if len(clusterId) == 0 {
+		return  fmt.Errorf("icks-cluster-info's configmap could not contain clusterId")
+	}
+	clusterName = clusterId
+
 	serviceName := fmt.Sprintf("%s/%s", service.Namespace, service.Name)
 	klog.V(2).Infof("Updating %d nodes for Service %s in cluster %s", len(nodes), serviceName, clusterName)
 
@@ -2171,6 +2181,7 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 	if err != nil {
 		return err
 	}
+
 
 	// Now, we have a load balancer.
 	lbName := lbaas.GetLoadBalancerName(ctx, loadbalancer.Name, service)
