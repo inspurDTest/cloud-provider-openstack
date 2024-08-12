@@ -118,7 +118,7 @@ const (
 	poolFormat    = "%s_%d"
 	monitorFormat = "monitor_%d_%s"
 	// namespace_endpointSliceName_protocol_port_addressIndex
-	memeberFormat = "%s_%s_%s_%d_%d"
+	memeberFormat = "k8s_%s_%s_%s_%d_%d"
 
 	NamespaceAnnotationLoadBalancerMemberSubnetID = "inspur.com/pod-subnet"
 )
@@ -1190,7 +1190,7 @@ func (lbaas *LbaasV2) createOctaviaHealthMonitor(createOpts v2monitors.CreateOpt
 }
 
 // Make sure the pool is created for the Service, nodes are added as pool members.
-func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *listeners.Listener, service *corev1.Service, port corev1.ServicePort, nodes []*corev1.Node, svcConf *serviceConfig, memberOpts map[int][]v2pools.BatchUpdateMemberOpts) (*v2pools.Pool, error) {
+func (lbaas *LbaasV2) ensureOctaviaPool(portIndex int, lbID string, name string, listener *listeners.Listener, service *corev1.Service, port corev1.ServicePort, nodes []*corev1.Node, svcConf *serviceConfig, memberOpts map[int][]v2pools.BatchUpdateMemberOpts) (*v2pools.Pool, error) {
 	pool, err := openstackutil.GetPoolByListener(lbaas.lb, lbID, listener.ID)
 	if err != nil && err != cpoerrors.ErrNotFound {
 		return nil, fmt.Errorf("error getting pool for listener %s: %v", listener.ID, err)
@@ -1248,8 +1248,12 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 	if err != nil {
 		klog.Errorf("failed to get members in the pool %s: %v", pool.ID, err)
 	}
-	for _, m := range poolMembers {
-		curMembers.Insert(fmt.Sprintf("%s-%s-%d-%d", m.Name, m.Address, m.ProtocolPort, m.MonitorPort))
+	for index, m := range poolMembers {
+		if portIndex != index {
+			continue
+		}
+		//curMembers.Insert(fmt.Sprintf("%s-%s-%d-%d", m.Name, m.Address, m.ProtocolPort, m.MonitorPort))
+		curMembers.Insert(fmt.Sprintf("%s-%s-%d", m.Name, m.Address, m.ProtocolPort))
 	}
 
 	// TODO 第一版本暂不开启 ServiceAnnotationLoadBalancerEnableHealthMonitor
@@ -1258,6 +1262,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(lbID string, name string, listener *list
 		return nil, err
 	}
 	klog.Infof("curMembers  is %+v, newMembers is %+v", curMembers, newMembers)
+
 	if !curMembers.Equal(newMembers) {
 		klog.Infof("Updating %d members for pool %s", len(members), pool.ID)
 		if err := openstackutil.BatchUpdatePoolMembers(lbaas.lb, lbID, pool.ID, members); err != nil {
@@ -1324,7 +1329,7 @@ func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(port corev1.ServicePort, nodes 
 	}
 
 	members = append(members, member...)
-	newMembers.Insert(fmt.Sprintf("%s-%d-%d-%d", member[0].Name, member[0].Address, member[0].ProtocolPort, len(members)))
+	newMembers.Insert(fmt.Sprintf("%s-%s-%d", member[0].Name, member[0].Address, member[0].ProtocolPort))
 	//newMembers.Insert(fmt.Sprintf("%s-%s-%d-%d", node.Name, addr, member.ProtocolPort, svcConf.healthCheckNodePort))
 	return members, newMembers, nil
 }
@@ -2022,14 +2027,14 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 		}
 
 		// 包含pool和memeber
-		pool, err := lbaas.ensureOctaviaPool(loadbalancer.ID, cpoutil.Sprintf255(poolFormat, lbName, portIndex), listener, service, port, nodes, svcConf, lbmembers)
+		_, err = lbaas.ensureOctaviaPool(portIndex, loadbalancer.ID, cpoutil.Sprintf255(poolFormat, lbName, portIndex), listener, service, port, nodes, svcConf, lbmembers)
 		if err != nil {
 			return nil, err
 		}
 
-		if err := lbaas.ensureOctaviaHealthMonitor(loadbalancer.ID, cpoutil.Sprintf255(monitorFormat, portIndex, lbName), pool, port, svcConf); err != nil {
+		/*if err := lbaas.ensureOctaviaHealthMonitor(loadbalancer.ID, cpoutil.Sprintf255(monitorFormat, portIndex, lbName), pool, port, svcConf); err != nil {
 			return nil, err
-		}
+		}*/
 
 		// After all ports have been processed, remaining listeners are removed if they were created by this Service.
 		// The remove of the listener must always happen at the end of the loop to avoid wrong assignment.
@@ -2203,7 +2208,7 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 			return fmt.Errorf("loadbalancer %s does not contain required listener for port %d and protocol %s", loadbalancer.ID, port.Port, port.Protocol)
 		}
 
-		pool, err := lbaas.ensureOctaviaPool(loadbalancer.ID, cpoutil.Sprintf255(poolFormat, lbName, portIndex), &listener, service, port, nodes, svcConf, nil)
+		pool, err := lbaas.ensureOctaviaPool(portIndex, loadbalancer.ID, cpoutil.Sprintf255(poolFormat, lbName, portIndex), &listener, service, port, nodes, svcConf, nil)
 		if err != nil {
 			return err
 		}
