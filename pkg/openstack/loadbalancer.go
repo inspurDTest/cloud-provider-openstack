@@ -1241,19 +1241,20 @@ func (lbaas *LbaasV2) ensureOctaviaPool(portIndex int, lbID string, name string,
 	}
 
 	// TODO get old memeber
-	curMembers := sets.New[string]()
+	//curMembers := sets.New[string]()
+	curMembers := make(map[string]string)
+
 	poolMembers, err := openstackutil.GetMembersbyPool(lbaas.lb, pool.ID)
 	klog.Infof("poolID  is %s, poolMembers is %+v", pool.ID, poolMembers)
 
 	if err != nil {
 		klog.Errorf("failed to get members in the pool %s: %v", pool.ID, err)
 	}
-	for index, m := range poolMembers {
-		if portIndex != index {
-			continue
-		}
+	for _, m := range poolMembers {
+
+		curMembers[fmt.Sprintf("%s-%s-%d", m.Name, m.Address, m.ProtocolPort)] = fmt.Sprintf("%s-%s-%d", m.Name, m.Address, m.ProtocolPort)
 		//curMembers.Insert(fmt.Sprintf("%s-%s-%d-%d", m.Name, m.Address, m.ProtocolPort, m.MonitorPort))
-		curMembers.Insert(fmt.Sprintf("%s-%s-%d", m.Name, m.Address, m.ProtocolPort))
+		//curMembers.Insert(fmt.Sprintf("%s-%s-%d", m.Name, m.Address, m.ProtocolPort))
 	}
 
 	// TODO 第一版本暂不开启 ServiceAnnotationLoadBalancerEnableHealthMonitor
@@ -1265,6 +1266,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(portIndex int, lbID string, name string,
 	}
 	klog.Infof("curMembers  is %+v, newMembers is %+v", curMembers, newMembers)
 
+	// 1、校验member个数 2、校验新member在旧的member存在
 	if !curMembers.Equal(newMembers) {
 		klog.Infof("Updating %d members for pool %s", len(members), pool.ID)
 		if err := openstackutil.BatchUpdatePoolMembers(lbaas.lb, lbID, pool.ID, members); err != nil {
@@ -1312,9 +1314,10 @@ func (lbaas *LbaasV2) buildPoolCreateOpt(listenerProtocol string, service *corev
 
 // TODO address改为endpoint获取
 // buildBatchUpdateMemberOpts returns v2pools.BatchUpdateMemberOpts array for Services and Nodes alongside a list of member names
-func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(portIndex int, port corev1.ServicePort, nodes []*corev1.Node, svcConf *serviceConfig, allMembers map[int][]v2pools.BatchUpdateMemberOpts) ([]v2pools.BatchUpdateMemberOpts, sets.Set[string], error) {
+func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(portIndex int, port corev1.ServicePort, nodes []*corev1.Node, svcConf *serviceConfig, allMembers map[int][]v2pools.BatchUpdateMemberOpts) ([]v2pools.BatchUpdateMemberOpts, map[string]string, error) {
 	var members []v2pools.BatchUpdateMemberOpts
-	newMembers := sets.New[string]()
+	// newMembers := sets.New[string]()
+	newMembers := make(map[string]string)
 
 	if len(allMembers) == 0 {
 		return members, newMembers, nil
@@ -1331,8 +1334,9 @@ func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(portIndex int, port corev1.Serv
 	}
 
 	members = append(members, member...)
-	if portIndex < len(members){
-		newMembers.Insert(fmt.Sprintf("%s-%s-%d", *(member[portIndex].Name), member[portIndex].Address, member[portIndex].ProtocolPort))
+	for _,m := range  members{
+		newMember := fmt.Sprintf("%s-%s-%d", *(m.Name), m.Address, m.ProtocolPort)
+		newMembers[newMember] = newMember
 	}
 	//newMembers.Insert(fmt.Sprintf("%s-%s-%d-%d", node.Name, addr, member.ProtocolPort, svcConf.healthCheckNodePort))
 
