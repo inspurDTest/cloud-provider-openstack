@@ -526,7 +526,7 @@ func (lbaas *LbaasV2) createOctaviaLoadBalancer(name, clusterName string, servic
 	if !lbaas.opts.ProviderRequiresSerialAPICalls {
 		for portIndex, port := range service.Spec.Ports {
 			listenerCreateOpt := lbaas.buildListenerCreateOpt(port, svcConf, cpoutil.Sprintf255(listenerFormat, name, portIndex))
-			members, newMembers, err := lbaas.buildBatchUpdateMemberOpts(port, nodes, svcConf, nil)
+			members, newMembers, err := lbaas.buildBatchUpdateMemberOpts(portIndex, port, nodes, svcConf, nil)
 			if err != nil {
 				return nil, err
 			}
