@@ -1259,7 +1259,7 @@ func (lbaas *LbaasV2) ensureOctaviaPool(portIndex int, lbID string, name string,
 	// TODO 第一版本暂不开启 ServiceAnnotationLoadBalancerEnableHealthMonitor
 	//members := make(map[int][]v2pools.BatchUpdateMemberOpts)
 	//members[0] = memberOpts[portIndex]
-	members, newMembers, err := lbaas.buildBatchUpdateMemberOpts(port, nodes, svcConf, memberOpts)
+	members, newMembers, err := lbaas.buildBatchUpdateMemberOpts(portIndex, port, nodes, svcConf, memberOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1312,7 +1312,7 @@ func (lbaas *LbaasV2) buildPoolCreateOpt(listenerProtocol string, service *corev
 
 // TODO address改为endpoint获取
 // buildBatchUpdateMemberOpts returns v2pools.BatchUpdateMemberOpts array for Services and Nodes alongside a list of member names
-func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(port corev1.ServicePort, nodes []*corev1.Node, svcConf *serviceConfig, allMembers map[int][]v2pools.BatchUpdateMemberOpts) ([]v2pools.BatchUpdateMemberOpts, sets.Set[string], error) {
+func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(portIndex int, port corev1.ServicePort, nodes []*corev1.Node, svcConf *serviceConfig, allMembers map[int][]v2pools.BatchUpdateMemberOpts) ([]v2pools.BatchUpdateMemberOpts, sets.Set[string], error) {
 	var members []v2pools.BatchUpdateMemberOpts
 	newMembers := sets.New[string]()
 
@@ -1331,8 +1331,11 @@ func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(port corev1.ServicePort, nodes 
 	}
 
 	members = append(members, member...)
-	newMembers.Insert(fmt.Sprintf("%s-%s-%d", *(member[0].Name), member[0].Address, member[0].ProtocolPort))
+	if portIndex < len(members){
+		newMembers.Insert(fmt.Sprintf("%s-%s-%d", *(member[portIndex].Name), member[portIndex].Address, member[portIndex].ProtocolPort))
+	}
 	//newMembers.Insert(fmt.Sprintf("%s-%s-%d-%d", node.Name, addr, member.ProtocolPort, svcConf.healthCheckNodePort))
+
 	return members, newMembers, nil
 }
 
