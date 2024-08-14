@@ -1266,8 +1266,18 @@ func (lbaas *LbaasV2) ensureOctaviaPool(portIndex int, lbID string, name string,
 	}
 	klog.Infof("curMembers  is %+v, newMembers is %+v", curMembers, newMembers)
 
+	update := false
 	// 1、校验member个数 2、校验新member在旧的member存在
-	if !curMembers.Equal(newMembers) {
+	if len(curMembers) != len(newMembers){
+		update = true
+     }
+	for newMember, _ := range newMembers {
+		if _, ok := curMembers[newMember]; !ok {
+			update = true
+			break
+		}
+	}
+	if  update {
 		klog.Infof("Updating %d members for pool %s", len(members), pool.ID)
 		if err := openstackutil.BatchUpdatePoolMembers(lbaas.lb, lbID, pool.ID, members); err != nil {
 			return nil, err
