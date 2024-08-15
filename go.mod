@@ -6,7 +6,7 @@ require (
 	github.com/container-storage-interface/spec v1.8.0
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/hashicorp/go-version v1.6.0
-	github.com/inspurDTest/cloud-provider v0.29.0-42
+	github.com/inspurDTest/cloud-provider v0.29.0-43
 	github.com/inspurDTest/gophercloud v1.6.0-45
 	github.com/inspurDTest/utils v1.0.0-2
 	github.com/kubernetes-csi/csi-lib-utils v0.13.0
@@ -44,7 +44,7 @@ require (
 
 // the below fixes the "go list -m all" execution
 replace (
-	github.com/inspurDTest/cloud-provider => github.com/inspurDTest/cloud-provider v0.29.0-42
+	github.com/inspurDTest/cloud-provider => github.com/inspurDTest/cloud-provider v0.29.0-43
 	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.28.4
 	k8s.io/dynamic-resource-allocation => k8s.io/dynamic-resource-allocation v0.28.4
 	k8s.io/endpointslice => k8s.io/endpointslice v0.28.4

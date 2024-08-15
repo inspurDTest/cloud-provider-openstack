@@ -1205,10 +1205,22 @@ func (lbaas *LbaasV2) ensureOctaviaPool(portIndex int, lbID string, name string,
 		poolProto = v2pools.ProtocolHTTP
 	}
 
-	// Delete the pool and its members if it already exists and has the wrong protocol
-	if pool != nil && v2pools.Protocol(pool.Protocol) != poolProto {
-		klog.Infof("Deleting unused pool, poolID is %s, listenerID is %s, lbID is %s", pool.ID, listener.ID, lbID)
+	// new LBMethod
+	affinity := service.Spec.SessionAffinity
+	//var persistence *v2pools.SessionPersistence
+	var newLBMethod v2pools.LBMethod
+	switch affinity {
+	case corev1.ServiceAffinityNone:
+		newLBMethod = v2pools.LBMethodRoundRobin
+	case corev1.ServiceAffinityClientIP:
+		newLBMethod = v2pools.LBMethodSourceIp
+	}
 
+	// Delete the pool and its members if it already exists and has the wrong protocol and has the wrong LBMethod
+	if pool != nil && ( v2pools.Protocol(pool.Protocol) != poolProto ||
+		(v2pools.LBMethod(pool.LBMethod) != newLBMethod) ) {
+
+		klog.Infof("Deleting unused pool, poolID is %s, listenerID is %s, lbID is %s", pool.ID, listener.ID, lbID)
 		// Delete pool automatically deletes all its members.
 		if err := openstackutil.DeletePool(lbaas.lb, pool.ID, lbID); err != nil {
 			return nil, err
@@ -1305,20 +1317,19 @@ func (lbaas *LbaasV2) buildPoolCreateOpt(listenerProtocol string, service *corev
 	}
 
 	affinity := service.Spec.SessionAffinity
-	var persistence *v2pools.SessionPersistence
+	//var persistence *v2pools.SessionPersistence
+	var lbmethod v2pools.LBMethod
 	switch affinity {
 	case corev1.ServiceAffinityNone:
-		persistence = nil
+		lbmethod = v2pools.LBMethodRoundRobin
 	case corev1.ServiceAffinityClientIP:
-		persistence = &v2pools.SessionPersistence{Type: "SOURCE_IP"}
+		lbmethod = v2pools.LBMethodSourceIp
 	}
 
-	lbmethod := v2pools.LBMethod(lbaas.opts.LBMethod)
 	return v2pools.CreateOpts{
 		Name:        name,
 		Protocol:    poolProto,
 		LBMethod:    lbmethod,
-		Persistence: persistence,
 	}
 }
 
