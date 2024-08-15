@@ -2581,6 +2581,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		klog.InfoS("Deleted health monitor", "monitorID", monitorID, "lbID", loadbalancer.ID)
 	}
 
+
 	// delete listeners
 	if err := lbaas.deleteListeners(loadbalancer.ID, listenerList); err != nil {
 		klog.Errorf("Failed to deleteListeners: %v", err.Error())
