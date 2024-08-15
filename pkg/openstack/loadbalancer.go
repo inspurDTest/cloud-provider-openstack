@@ -2477,8 +2477,9 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 	klog.V(1).Infof("begin to delete LoadBalancer service: %v, lbID: %v", service, lbID)
 
 	if service.Status.Size() == 0 || service.Status.LoadBalancer.Size() == 0 {
-		klog.V(1).Infof("service not bond to lb")
-		return nil
+		// klog.V(1).Infof("service not bond to lb")
+		// return nil
+		klog.V(1).Infof("kube-controller-manager is faster is than ccm")
 	}
 
 	cm, err := lbaas.kclient.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "icks-cluster-info", metav1.GetOptions{})
