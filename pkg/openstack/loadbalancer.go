@@ -2549,7 +2549,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 			Port:     int(port.Port),
 		}]
 		// 这一部分不需要改，通过listener的tags以及key确认listener的归属
-		klog.InfoS("listener.Name: %s, lbName: %s", listener.Name, lbName)
+		//klog.InfoS("listener.Name: %s, lbName: %s", listener.Name, lbName)
 		if isPresent && strings.Contains(listener.Name, lbName) {
 			listenersToDelete = append(listenersToDelete, *listener)
 		}
