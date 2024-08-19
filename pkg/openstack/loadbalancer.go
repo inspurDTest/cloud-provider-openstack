@@ -105,8 +105,8 @@ const (
 	// revive:enable:var-naming
 	// See https://nip.io
 	defaultProxyHostnameSuffix         = "nip.io"
-	ServiceAnnotationLoadBalancerID    = "loadbalancer.openstack.org/load-balancer-id"
-	ServiceAnnotationLoadBalancerOldID = "loadbalancer.openstack.org/load-balancer-old-id"
+	ServiceAnnotationLoadBalancerID    = "inspur.com/load-balancer-id"
+	ServiceAnnotationLoadBalancerOldID = "inspur.com/load-balancer-old-id"
 
 	// Octavia resources name formats
 	//k8s_svcNs_svcName 是否需要加上vip
