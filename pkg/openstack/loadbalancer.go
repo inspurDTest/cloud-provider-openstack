@@ -103,7 +103,7 @@ const (
 	// revive:disable:var-naming
 	ServiceAnnotationTlsContainerRef = "loadbalancer.openstack.org/default-tls-container-ref"
 	// revive:enable:var-naming
-	// See https://nip.io 	
+	// See https://nip.io
 	defaultProxyHostnameSuffix         = "nip.io"
 	ServiceAnnotationLoadBalancerID    = "inspur.com/load-balancer-id"
 	ServiceAnnotationLoadBalancerOldID = "inspur.com/load-balancer-old-id"
@@ -1217,8 +1217,8 @@ func (lbaas *LbaasV2) ensureOctaviaPool(portIndex int, lbID string, name string,
 	}
 
 	// Delete the pool and its members if it already exists and has the wrong protocol and has the wrong LBMethod
-	if pool != nil && ( v2pools.Protocol(pool.Protocol) != poolProto ||
-		(v2pools.LBMethod(pool.LBMethod) != newLBMethod) ) {
+	if pool != nil && (v2pools.Protocol(pool.Protocol) != poolProto ||
+		(v2pools.LBMethod(pool.LBMethod) != newLBMethod)) {
 
 		klog.Infof("Deleting unused pool, poolID is %s, listenerID is %s, lbID is %s", pool.ID, listener.ID, lbID)
 		// Delete pool automatically deletes all its members.
@@ -1280,16 +1280,16 @@ func (lbaas *LbaasV2) ensureOctaviaPool(portIndex int, lbID string, name string,
 
 	update := false
 	// 1、校验member个数 2、校验新member在旧的member存在
-	if len(curMembers) != len(newMembers){
+	if len(curMembers) != len(newMembers) {
 		update = true
-     }
+	}
 	for newMember, _ := range newMembers {
 		if _, ok := curMembers[newMember]; !ok {
 			update = true
 			break
 		}
 	}
-	if  update {
+	if update {
 		klog.Infof("Updating %d members for pool %s", len(members), pool.ID)
 		if err := openstackutil.BatchUpdatePoolMembers(lbaas.lb, lbID, pool.ID, members); err != nil {
 			return nil, err
@@ -1327,9 +1327,9 @@ func (lbaas *LbaasV2) buildPoolCreateOpt(listenerProtocol string, service *corev
 	}
 
 	return v2pools.CreateOpts{
-		Name:        name,
-		Protocol:    poolProto,
-		LBMethod:    lbmethod,
+		Name:     name,
+		Protocol: poolProto,
+		LBMethod: lbmethod,
 	}
 }
 
@@ -1355,7 +1355,7 @@ func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(portIndex int, port corev1.Serv
 	}
 
 	members = append(members, member...)
-	for _,m := range  members{
+	for _, m := range members {
 		newMember := fmt.Sprintf("%s-%s-%d", *(m.Name), m.Address, m.ProtocolPort)
 		newMembers[newMember] = newMember
 	}
@@ -1371,10 +1371,13 @@ func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListene
 	listener, isPresent := curListenerMapping[name]
 
 	// listener不存在，或者存在但协议发生修改时
-	if !isPresent || ( string(port.Protocol) != listener.Protocol){
+	if !isPresent || (string(port.Protocol) != listener.Protocol) {
 		if isPresent {
-			if err := openstackutil.DeleteListener(lbaas.lb, listener.ID ,lbID);err != nil {
-				return nil, fmt.Errorf("failed to delete listener %s for loadbalancer %s: %v", listener.ID, lbID, err)
+			var lbListeners []listeners.Listener
+			lbListeners = append(lbListeners, *listener)
+			if err := lbaas.deleteListeners(lbID, lbListeners); err != nil {
+				klog.Errorf("Failed to deleteListeners: %v", err.Error())
+				return nil, err
 			}
 		}
 
@@ -1397,10 +1400,10 @@ func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListene
 		updateOpts := listeners.UpdateOpts{}
 
 		// TODO port变化时可以只修改listener，如果协议变化必须delete后create
-		if port.Port != int32(listener.ProtocolPort ){
-            updateOpts.ProtocolPort = int(port.Port)
+		if port.Port != int32(listener.ProtocolPort) {
+			updateOpts.ProtocolPort = int(port.Port)
 			listenerUpdateChanged = true
-        }
+		}
 
 		if svcConf.connLimit != listener.ConnLimit {
 			updateOpts.ConnLimit = &svcConf.connLimit
@@ -1448,7 +1451,6 @@ func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListene
 				listenerUpdateChanged = true
 			}
 		}
-
 
 		if listenerUpdateChanged {
 			klog.Infof("Updating listener,listenerID is  %s,lbID is  %s,updateOpts is  %+v", listener.ID, lbID, updateOpts)
@@ -1931,7 +1933,7 @@ func (lbaas *LbaasV2) getMemeberOptionsFromEps(podsInfo map[string]string, svcCo
 					ProtocolPort: int(*port.Port),
 					Name:         &memberName,
 					//ComputeId:    &podinfo,
-					SubnetID:     &svcConf.lbMemberSubnetID,
+					SubnetID: &svcConf.lbMemberSubnetID,
 					// TODO 进一步确认是否需要
 					Tags: []string{podinfo},
 				}
@@ -2051,7 +2053,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 			continue
 		}
 
-		if strings.HasPrefix(l.Tags[0],"k8s_") && strings.HasPrefix(l.Name,"k8s_") && strings.EqualFold(l.Tags[0],l.Name) {
+		if strings.HasPrefix(l.Tags[0], "k8s_") && strings.HasPrefix(l.Name, "k8s_") && strings.EqualFold(l.Tags[0], l.Name) {
 			key := l.Tags[0]
 			curListenerMapping[key] = &curListeners[i]
 		}
@@ -2203,7 +2205,7 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 	}
 	clusterId := cm.Data["clusterId"]
 	if len(clusterId) == 0 {
-		return  fmt.Errorf("icks-cluster-info's configmap could not contain clusterId")
+		return fmt.Errorf("icks-cluster-info's configmap could not contain clusterId")
 	}
 	clusterName = clusterId
 
@@ -2235,7 +2237,6 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 		return err
 	}
 
-
 	// Now, we have a load balancer.
 	lbName := lbaas.GetLoadBalancerName(ctx, loadbalancer.Name, service)
 	// Get all listeners for this loadbalancer, by "port&protocol".
@@ -2243,16 +2244,30 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 	lbListeners := make(map[string]*listeners.Listener)
 	for _, l := range loadbalancer.Listeners {
 		//key := listenerKey{Protocol: listeners.Protocol(l.Protocol), Port: l.ProtocolPort}
-		if len(l.Tags) > 0 && strings.Contains(l.Tags[0],"k8s_") && strings.EqualFold(l.Tags[0],l.Name){
+		if len(l.Tags) > 0 && strings.HasPrefix(l.Tags[0], lbName) && strings.Contains(l.Tags[0], "k8s_") && strings.EqualFold(l.Tags[0], l.Name) {
 			lbListeners[l.Name] = &l
+		}
+	}
+
+	// port减少时
+	if len(lbListeners) > len(service.Spec.Ports) {
+		var lbListenersArrayDelete []listeners.Listener
+		// lbListeners
+		for i := len(service.Spec.Ports); i < len(lbListeners); i++ {
+			name := cpoutil.Sprintf255(listenerFormat, lbName, i)
+			lbListenersArrayDelete = append(lbListenersArrayDelete, *lbListeners[name])
+		}
+
+		if err := lbaas.deleteListeners(loadbalancer.ID, lbListenersArrayDelete); err != nil {
+			klog.Errorf("Failed to deleteListeners: %v", err.Error())
+			return err
 		}
 	}
 
 	// Update pool members for each listener.
 	for portIndex, port := range service.Spec.Ports {
-
-		listener, err := lbaas.ensureOctaviaListener(loadbalancer.ID, cpoutil.Sprintf255(listenerFormat, lbName, portIndex),lbListeners,port,svcConf,service)
-		if err != nil{
+		listener, err := lbaas.ensureOctaviaListener(loadbalancer.ID, cpoutil.Sprintf255(listenerFormat, lbName, portIndex), lbListeners, port, svcConf, service)
+		if err != nil {
 			return err
 		}
 
@@ -2267,8 +2282,11 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 		}
 	}
 
-    // 王玉东 临时不关心ManageSecurityGroups
-	 return nil
+	// TODO 去掉端口怎么处理呢？
+	//portLength := len(service.Spec.Ports)
+
+	// 王玉东 临时不关心ManageSecurityGroups
+	return nil
 
 	/*if lbaas.opts.ManageSecurityGroups {
 		err := lbaas.ensureAndUpdateOctaviaSecurityGroup(clusterName, service, nodes, svcConf)
@@ -2503,7 +2521,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 
 	cm, err := lbaas.kclient.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "icks-cluster-info", metav1.GetOptions{})
 	if err != nil {
-		return  err
+		return err
 	}
 	clusterId := cm.Data["clusterId"]
 	if len(clusterId) == 0 {
@@ -2557,7 +2575,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 	var listenersToDelete []listeners.Listener
 	curListenerMapping := make(map[string]*listeners.Listener)
 	for _, l := range listenerList {
-		if len(l.Tags) > 0 && strings.Contains(l.Tags[0],"k8s_") && strings.EqualFold(l.Tags[0],l.Name){
+		if len(l.Tags) > 0 && strings.Contains(l.Tags[0], "k8s_") && strings.EqualFold(l.Tags[0], l.Name) {
 			curListenerMapping[l.Name] = &l
 		}
 	}
@@ -2597,7 +2615,6 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		}
 		klog.InfoS("Deleted health monitor", "monitorID", monitorID, "lbID", loadbalancer.ID)
 	}
-
 
 	// delete listeners
 	if err := lbaas.deleteListeners(loadbalancer.ID, listenerList); err != nil {
