@@ -2053,10 +2053,12 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 			continue
 		}
 
-		if strings.HasPrefix(l.Tags[0], "k8s_") && strings.HasPrefix(l.Name, "k8s_") && strings.EqualFold(l.Tags[0], l.Name) {
+		if strings.HasPrefix(l.Tags[0], lbName) && strings.EqualFold(l.Tags[0], l.Name) {
 			key := l.Tags[0]
 			curListenerMapping[key] = &curListeners[i]
 		}
+
+
 	}
 	klog.Infof("Existing listeners, portProtocolMapping is %+v", curListenerMapping)
 
@@ -2068,6 +2070,24 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 
 	lbmembers := lbaas.getMemeberOptions(clusterId, service.Namespace, svcConf, endpointSlices)
 	klog.Infof("lb Memeber FromEps is %+v", lbmembers)
+
+	// port减少时
+	klog.Infof("---------len(curListenerMapping):%+v,len(service.Spec.Ports):%+v", len(curListenerMapping),len(service.Spec.Ports) )
+	if len(curListenerMapping) > len(service.Spec.Ports) {
+		var lbListenersArrayDelete []listeners.Listener
+		// lbListeners
+		for i := len(service.Spec.Ports); i < len(curListenerMapping); i++ {
+			name := cpoutil.Sprintf255(listenerFormat, lbName, i)
+			lbListenersArrayDelete = append(lbListenersArrayDelete, *curListenerMapping[name])
+		}
+		klog.Infof("--------lbListenersArrayDelete:%+v,", lbListenersArrayDelete)
+
+		if err := lbaas.deleteListeners(loadbalancer.ID, lbListenersArrayDelete); err != nil {
+			klog.Errorf("Failed to deleteListeners: %v", err.Error())
+			return nil, err
+		}
+	}
+
 
 	// 生成listener+pool+memeber
 	for portIndex, port := range service.Spec.Ports {
@@ -2244,11 +2264,11 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 	lbListeners := make(map[string]*listeners.Listener)
 	for _, l := range loadbalancer.Listeners {
 		//key := listenerKey{Protocol: listeners.Protocol(l.Protocol), Port: l.ProtocolPort}
-		if len(l.Tags) > 0 && strings.HasPrefix(l.Tags[0], lbName) && strings.Contains(l.Tags[0], "k8s_") && strings.EqualFold(l.Tags[0], l.Name) {
+		if len(l.Tags) > 0 && strings.HasPrefix(l.Tags[0], lbName) && strings.EqualFold(l.Tags[0], l.Name) {
 			lbListeners[l.Name] = &l
 		}
 	}
-
+	klog.Infof("---------len(curListenerMapping):%+v,len(service.Spec.Ports):%+v", len(lbListeners),len(service.Spec.Ports) )
 	// port减少时
 	if len(lbListeners) > len(service.Spec.Ports) {
 		var lbListenersArrayDelete []listeners.Listener
@@ -2257,7 +2277,7 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 			name := cpoutil.Sprintf255(listenerFormat, lbName, i)
 			lbListenersArrayDelete = append(lbListenersArrayDelete, *lbListeners[name])
 		}
-
+		klog.Infof("--------lbListenersArrayDelete:%+v,", lbListenersArrayDelete)
 		if err := lbaas.deleteListeners(loadbalancer.ID, lbListenersArrayDelete); err != nil {
 			klog.Errorf("Failed to deleteListeners: %v", err.Error())
 			return err
@@ -2575,7 +2595,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 	var listenersToDelete []listeners.Listener
 	curListenerMapping := make(map[string]*listeners.Listener)
 	for _, l := range listenerList {
-		if len(l.Tags) > 0 && strings.Contains(l.Tags[0], "k8s_") && strings.EqualFold(l.Tags[0], l.Name) {
+		if len(l.Tags) > 0 && strings.HasPrefix(l.Tags[0], lbName) && strings.EqualFold(l.Tags[0], l.Name) {
 			curListenerMapping[l.Name] = &l
 		}
 	}
