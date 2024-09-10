@@ -2051,7 +2051,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 			continue
 		}
 
-		if strings.HasPrefix(l.Tags[0],"k8s_") && strings.HasPrefix(l.Name,"k8s_") && strings.EqualFold(l.Tags[0],l.Name)　{
+		if strings.HasPrefix(l.Tags[0],"k8s_") && strings.HasPrefix(l.Name,"k8s_") && strings.EqualFold(l.Tags[0],l.Name) {
 			key := l.Tags[0]
 			curListenerMapping[key] = &curListeners[i]
 		}
