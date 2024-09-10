@@ -103,13 +103,13 @@ const (
 	// revive:disable:var-naming
 	ServiceAnnotationTlsContainerRef = "loadbalancer.openstack.org/default-tls-container-ref"
 	// revive:enable:var-naming
-	// See https://nip.io
+	// See https://nip.io 	
 	defaultProxyHostnameSuffix         = "nip.io"
 	ServiceAnnotationLoadBalancerID    = "inspur.com/load-balancer-id"
 	ServiceAnnotationLoadBalancerOldID = "inspur.com/load-balancer-old-id"
 
 	// Octavia resources name formats
-	//k8s_svcNs_svcName 是否需要加上vip
+	//k8s_runtimeId_svcNs_svcName 是否需要加上vip
 	lbFormat = "%s_%s_%s_%s"
 	//listenerFormat = "listener_%d_%s"
 	//lbName_portIndex => k8s_runtimeId_svcNs_svcName_portIndex
@@ -378,10 +378,10 @@ type serviceConfig struct {
 	preferredIPFamily           corev1.IPFamily // preferred (the first) IP family indicated in service's `spec.ipFamilies`
 }
 
-type listenerKey struct {
+/*type listenerKey struct {
 	Protocol listeners.Protocol
 	Port     int
-}
+}*/
 
 // getLoadbalancerByName get the load balancer which is in valid status by the given name/legacy name.
 func getLoadbalancerByName(client *gophercloud.ServiceClient, name string, legacyName string) (*loadbalancers.LoadBalancer, error) {
@@ -1365,14 +1365,19 @@ func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(portIndex int, port corev1.Serv
 }
 
 // Make sure the listener is created for Service
-func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListenerMapping map[listenerKey]*listeners.Listener, port corev1.ServicePort, svcConf *serviceConfig, _ *corev1.Service) (*listeners.Listener, error) {
+func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListenerMapping map[string]*listeners.Listener, port corev1.ServicePort, svcConf *serviceConfig, _ *corev1.Service) (*listeners.Listener, error) {
 	// name: listener_【portIndex】_【LBName】例如： listener_【portIndex】_kube_service_[clusterName]_[Namespace]_[serviceName]
 	// TODO 已存在的listener会抛错,此处默认都不存在
-	listener, isPresent := curListenerMapping[listenerKey{
-		Protocol: getListenerProtocol(port.Protocol, svcConf),
-		Port:     int(port.Port),
-	}]
-	if !isPresent {
+	listener, isPresent := curListenerMapping[name]
+
+	// listener不存在，或者存在但协议发生修改时
+	if !isPresent || ( string(port.Protocol) != listener.Protocol){
+		if isPresent {
+			if err := openstackutil.DeleteListener(lbaas.lb, listener.ID ,lbID);err != nil {
+				return nil, fmt.Errorf("failed to delete listener %s for loadbalancer %s: %v", listener.ID, lbID, err)
+			}
+		}
+
 		// 前边已经校验过，listener默认不存在,但是更新时时有listener
 		listenerCreateOpt := lbaas.buildListenerCreateOpt(port, svcConf, name)
 		listenerCreateOpt.LoadbalancerID = lbID
@@ -1388,12 +1393,18 @@ func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListene
 		klog.V(2).Infof("Listener %s created for loadbalancer %s", listener.ID, lbID)
 	} else {
 		// 同一个service更新时，listener内容更新为service最新
-		listenerChanged := false
+		listenerUpdateChanged := false
 		updateOpts := listeners.UpdateOpts{}
+
+		// TODO port变化时可以只修改listener，如果协议变化必须delete后create
+		if port.Port != int32(listener.ProtocolPort ){
+            updateOpts.ProtocolPort = int(port.Port)
+			listenerUpdateChanged = true
+        }
 
 		if svcConf.connLimit != listener.ConnLimit {
 			updateOpts.ConnLimit = &svcConf.connLimit
-			listenerChanged = true
+			listenerUpdateChanged = true
 		}
 
 		listenerKeepClientIP := listener.InsertHeaders[annotationXForwardedFor] == "true"
@@ -1407,44 +1418,44 @@ func (lbaas *LbaasV2) ensureOctaviaListener(lbID string, name string, curListene
 			} else {
 				delete(*updateOpts.InsertHeaders, annotationXForwardedFor)
 			}
-			listenerChanged = true
+			listenerUpdateChanged = true
 		}
 		if svcConf.tlsContainerRef != listener.DefaultTlsContainerRef {
 			updateOpts.DefaultTlsContainerRef = &svcConf.tlsContainerRef
-			listenerChanged = true
+			listenerUpdateChanged = true
 		}
 		if openstackutil.IsOctaviaFeatureSupported(lbaas.lb, openstackutil.OctaviaFeatureTimeout, lbaas.opts.LBProvider) {
 			if svcConf.timeoutClientData != listener.TimeoutClientData {
 				updateOpts.TimeoutClientData = &svcConf.timeoutClientData
-				listenerChanged = true
+				listenerUpdateChanged = true
 			}
 			if svcConf.timeoutMemberConnect != listener.TimeoutMemberConnect {
 				updateOpts.TimeoutMemberConnect = &svcConf.timeoutMemberConnect
-				listenerChanged = true
+				listenerUpdateChanged = true
 			}
 			if svcConf.timeoutMemberData != listener.TimeoutMemberData {
 				updateOpts.TimeoutMemberData = &svcConf.timeoutMemberData
-				listenerChanged = true
+				listenerUpdateChanged = true
 			}
 			if svcConf.timeoutTCPInspect != listener.TimeoutTCPInspect {
 				updateOpts.TimeoutTCPInspect = &svcConf.timeoutTCPInspect
-				listenerChanged = true
+				listenerUpdateChanged = true
 			}
 		}
 		if openstackutil.IsOctaviaFeatureSupported(lbaas.lb, openstackutil.OctaviaFeatureVIPACL, lbaas.opts.LBProvider) {
 			if !cpoutil.StringListEqual(svcConf.allowedCIDR, listener.AllowedCIDRs) {
 				updateOpts.AllowedCIDRs = &svcConf.allowedCIDR
-				listenerChanged = true
+				listenerUpdateChanged = true
 			}
 		}
 
-		if listenerChanged {
+
+		if listenerUpdateChanged {
 			klog.Infof("Updating listener,listenerID is  %s,lbID is  %s,updateOpts is  %+v", listener.ID, lbID, updateOpts)
 			if err := openstackutil.UpdateListener(lbaas.lb, lbID, listener.ID, updateOpts); err != nil {
 				return nil, fmt.Errorf("failed to update listener %s of loadbalancer %s: %v", listener.ID, lbID, err)
 			}
 			klog.Infof("Updated listener,listenerID is  %s,lbID is  %s", listener.ID, lbID)
-
 		}
 	}
 
@@ -1818,9 +1829,10 @@ func (lbaas *LbaasV2) checkService(service *corev1.Service, nodes []*corev1.Node
 }
 
 // checkListenerPorts checks if there is conflict for ports.
-func (lbaas *LbaasV2) checkListenerPorts(service *corev1.Service, curListenerMapping map[listenerKey]*listeners.Listener, lbName string) error {
-	for _, svcPort := range service.Spec.Ports {
-		key := listenerKey{Protocol: listeners.Protocol(svcPort.Protocol), Port: int(svcPort.Port)}
+func (lbaas *LbaasV2) checkListenerPorts(service *corev1.Service, curListenerMapping map[string]*listeners.Listener, lbName string) error {
+	for portIndex, svcPort := range service.Spec.Ports {
+		//key := listenerKey{Protocol: listeners.Protocol(svcPort.Protocol), Port: int(svcPort.Port)}
+		key := cpoutil.Sprintf255(listenerFormat, lbName, portIndex)
 
 		if listener, isPresent := curListenerMapping[key]; isPresent {
 			// The listener is used by this Service if LB name is in the tags, or
@@ -2031,12 +2043,18 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 	// This is an existing load balancer, either created by occm for other Services or by the user outside of cluster, or
 	// a newly created, unpopulated loadbalancer that needs populating.
 	curListeners := loadbalancer.Listeners
-	curListenerMapping := make(map[listenerKey]*listeners.Listener)
+	curListenerMapping := make(map[string]*listeners.Listener)
 
 	// 查询已经listner
 	for i, l := range curListeners {
-		key := listenerKey{Protocol: listeners.Protocol(l.Protocol), Port: l.ProtocolPort}
-		curListenerMapping[key] = &curListeners[i]
+		if len(l.Tags) <= 0 {
+			continue
+		}
+
+		if strings.HasPrefix(l.Tags[0],"k8s_") && strings.HasPrefix(l.Name,"k8s_") && strings.EqualFold(l.Tags[0],l.Name)　{
+			key := l.Tags[0]
+			curListenerMapping[key] = &curListeners[i]
+		}
 	}
 	klog.Infof("Existing listeners, portProtocolMapping is %+v", curListenerMapping)
 
@@ -2221,24 +2239,24 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 	// Now, we have a load balancer.
 	lbName := lbaas.GetLoadBalancerName(ctx, loadbalancer.Name, service)
 	// Get all listeners for this loadbalancer, by "port&protocol".
-	lbListeners := make(map[listenerKey]listeners.Listener)
+
+	lbListeners := make(map[string]*listeners.Listener)
 	for _, l := range loadbalancer.Listeners {
-		key := listenerKey{Protocol: listeners.Protocol(l.Protocol), Port: l.ProtocolPort}
-		lbListeners[key] = l
+		//key := listenerKey{Protocol: listeners.Protocol(l.Protocol), Port: l.ProtocolPort}
+		if len(l.Tags) > 0 && strings.Contains(l.Tags[0],"k8s_") && strings.EqualFold(l.Tags[0],l.Name){
+			lbListeners[l.Name] = &l
+		}
 	}
 
 	// Update pool members for each listener.
 	for portIndex, port := range service.Spec.Ports {
-		proto := getListenerProtocol(port.Protocol, svcConf)
-		listener, ok := lbListeners[listenerKey{
-			Protocol: proto,
-			Port:     int(port.Port),
-		}]
-		if !ok {
-			return fmt.Errorf("loadbalancer %s does not contain required listener for port %d and protocol %s", loadbalancer.ID, port.Port, port.Protocol)
+
+		listener, err := lbaas.ensureOctaviaListener(loadbalancer.ID, cpoutil.Sprintf255(listenerFormat, lbName, portIndex),lbListeners,port,svcConf,service)
+		if err != nil{
+			return err
 		}
 
-		pool, err := lbaas.ensureOctaviaPool(portIndex, loadbalancer.ID, cpoutil.Sprintf255(poolFormat, lbName, portIndex), &listener, service, port, nodes, svcConf, nil)
+		pool, err := lbaas.ensureOctaviaPool(portIndex, loadbalancer.ID, cpoutil.Sprintf255(poolFormat, lbName, portIndex), listener, service, port, nodes, svcConf, nil)
 		if err != nil {
 			return err
 		}
@@ -2248,6 +2266,7 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 			return err
 		}
 	}
+
     // 王玉东 临时不关心ManageSecurityGroups
 	 return nil
 
@@ -2536,18 +2555,15 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 
 	// TODO 默认不删除LB
 	var listenersToDelete []listeners.Listener
-	curListenerMapping := make(map[listenerKey]*listeners.Listener)
-	for i, l := range listenerList {
-		key := listenerKey{Protocol: listeners.Protocol(l.Protocol), Port: l.ProtocolPort}
-		curListenerMapping[key] = &listenerList[i]
+	curListenerMapping := make(map[string]*listeners.Listener)
+	for _, l := range listenerList {
+		if len(l.Tags) > 0 && strings.Contains(l.Tags[0],"k8s_") && strings.EqualFold(l.Tags[0],l.Name){
+			curListenerMapping[l.Name] = &l
+		}
 	}
 
-	for _, port := range service.Spec.Ports {
-		proto := getListenerProtocol(port.Protocol, svcConf)
-		listener, isPresent := curListenerMapping[listenerKey{
-			Protocol: proto,
-			Port:     int(port.Port),
-		}]
+	for portIndex, _ := range service.Spec.Ports {
+		listener, isPresent := curListenerMapping[cpoutil.Sprintf255(listenerFormat, lbName, portIndex)]
 		// 这一部分不需要改，通过listener的tags以及key确认listener的归属
 		//klog.InfoS("listener.Name: %s, lbName: %s", listener.Name, lbName)
 		if isPresent && strings.Contains(listener.Name, lbName) {
