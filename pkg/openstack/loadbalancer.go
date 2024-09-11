@@ -2277,7 +2277,9 @@ func (lbaas *LbaasV2) updateOctaviaLoadBalancer(ctx context.Context, clusterName
 		// lbListeners
 		for i := len(service.Spec.Ports); i < len(lbListeners); i++ {
 			name := cpoutil.Sprintf255(listenerFormat, lbName, i)
-			lbListenersArrayDelete = append(lbListenersArrayDelete, *lbListeners[name])
+			if value, exists := lbListeners[name]; exists {
+				lbListenersArrayDelete = append(lbListenersArrayDelete, *value)
+			}
 		}
 		klog.Infof("--------lbListenersArrayDelete:%+v,", lbListenersArrayDelete)
 		if err := lbaas.deleteListeners(loadbalancer.ID, lbListenersArrayDelete); err != nil {
