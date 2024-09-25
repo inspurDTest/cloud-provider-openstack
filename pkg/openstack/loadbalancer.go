@@ -2597,10 +2597,11 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 
 	// TODO 默认不删除LB
 	var listenersToDelete []listeners.Listener
-	curListenerMapping := make(map[string]*listeners.Listener)
+	curListenerMapping := make(map[string]listeners.Listener)
 	for _, l := range listenerList {
 		if len(l.Tags) > 0 && strings.HasPrefix(l.Tags[0], lbName + "_") && strings.EqualFold(l.Tags[0], l.Name) {
-			curListenerMapping[l.Name] = &l
+			curListenerMapping[l.Name] = l
+			klog.V(1).Infof("-----:curListener key: %v, value: %+v", l.Name, l)
 		}
 	}
 	klog.V(1).Infof("deleting LoadBalancer curListenerMapping is :  %+v", curListenerMapping)
@@ -2610,7 +2611,7 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 		//klog.InfoS("listener.Name: %s, lbName: %s", listener.Name, lbName)
 		if isPresent {
 			klog.V(1).Infof("deleting LoadBalancer listener is :  %+v", listener)
-			listenersToDelete = append(listenersToDelete, *listener)
+			listenersToDelete = append(listenersToDelete, listener)
 		}
 	}
 	klog.V(1).Infof("listenersToDelete:  %v", listenersToDelete)
