@@ -2535,7 +2535,7 @@ func (lbaas *LbaasV2) deleteFIPIfCreatedByProvider(fip *floatingips.FloatingIP, 
 
 // handle service delete && remove loadbalanceId ,add oldloadbalanceId
 func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName string, service *corev1.Service, lbID string) error {
-	klog.V(1).Infof("begin to delete LoadBalancer service: %v, lbID: %v", service, lbID)
+	klog.V(1).Infof("begin to delete LoadBalancer service: %v, lbID: %v", service.Name, lbID)
 
 	if service.Status.Size() == 0 || service.Status.LoadBalancer.Size() == 0 {
 		// klog.V(1).Infof("service not bond to lb")
@@ -2599,16 +2599,17 @@ func (lbaas *LbaasV2) ensureLoadBalancerDeleted(ctx context.Context, clusterName
 	var listenersToDelete []listeners.Listener
 	curListenerMapping := make(map[string]*listeners.Listener)
 	for _, l := range listenerList {
-		if len(l.Tags) > 0 && strings.HasPrefix(l.Tags[0], lbName) && strings.EqualFold(l.Tags[0], l.Name) {
+		if len(l.Tags) > 0 && strings.HasPrefix(l.Tags[0], lbName + "_") && strings.EqualFold(l.Tags[0], l.Name) {
 			curListenerMapping[l.Name] = &l
 		}
 	}
-
+	klog.V(1).Infof("deleting LoadBalancer curListenerMapping is :  %+v", curListenerMapping)
 	for portIndex, _ := range service.Spec.Ports {
 		listener, isPresent := curListenerMapping[cpoutil.Sprintf255(listenerFormat, lbName, portIndex)]
 		// 这一部分不需要改，通过listener的tags以及key确认listener的归属
 		//klog.InfoS("listener.Name: %s, lbName: %s", listener.Name, lbName)
-		if isPresent && strings.Contains(listener.Name, lbName) {
+		if isPresent {
+			klog.V(1).Infof("deleting LoadBalancer listener is :  %+v", listener)
 			listenersToDelete = append(listenersToDelete, *listener)
 		}
 	}
