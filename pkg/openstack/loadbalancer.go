@@ -1343,14 +1343,16 @@ func (lbaas *LbaasV2) buildBatchUpdateMemberOpts(portIndex int, port corev1.Serv
 	if len(allMembers) == 0 {
 		return members, newMembers, nil
 	}
-
-	if port.Port == 0 || port.TargetPort.IntValue() == 0 {
-		klog.V(4).Infof("port is err,port.Port:%v,port.TargetPort.IntValue():%v", port.Port, port.TargetPort)
+    //TargetPort  maybe  string or int
+	//if port.Port == 0 || port.TargetPort.IntValue() == 0 {
+	if port.Port == 0  {
+		klog.Infof("port is err,port.Port:%v,port.TargetPort.IntValue():%v", port.Port, port.TargetPort)
 		return members, newMembers, nil
 	}
 
-	member := allMembers[port.TargetPort.IntValue()]
+	member := allMembers[int(port.Port)]
 	if len(member) == 0 {
+		klog.Infof("port is err,len(member) is 0")
 		return members, newMembers, nil
 	}
 
