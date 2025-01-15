@@ -3,6 +3,7 @@
 # Define deployment mode for the controller and provide cloud credentials in cloudConfig at the end of the file
 #
 ## Annotations to apply to all resources
+
 commonAnnotations: {}
 # commonAnnotations:
 #   "helm.sh/hook": pre-install,pre-upgrade
